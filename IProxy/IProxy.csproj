@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{148821A1-528E-4338-8006-A6FB6AB4DF9D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IProxy</RootNamespace>
+    <AssemblyName>IProxy</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Mod\AssemblyRequestExtentionBase.cs" />
+    <Compile Include="common\data\Descriptors.cs" />
+    <Compile Include="common\data\XmlDatas.cs" />
+    <Compile Include="common\SimpleSettings.cs" />
+    <Compile Include="common\WeakDictionary.cs" />
+    <Compile Include="Mod\IProxyMod.cs" />
+    <Compile Include="Mod\ISettingsProvider.cs" />
+    <Compile Include="Mod\WinForm\WinFormProviderExtentionBase.cs" />
+    <Compile Include="networking\cliPackets\AcceptTradePacket.cs" />
+    <Compile Include="networking\cliPackets\AoEAckPacket.cs" />
+    <Compile Include="networking\cliPackets\BuyPacket.cs" />
+    <Compile Include="networking\cliPackets\CancelTradePacket.cs" />
+    <Compile Include="networking\cliPackets\ChangeGuildRankPacket.cs" />
+    <Compile Include="networking\cliPackets\ChangeTradePacket.cs" />
+    <Compile Include="networking\cliPackets\CheckCreditsPacket.cs" />
+    <Compile Include="networking\cliPackets\ChooseNamePacket.cs" />
+    <Compile Include="networking\cliPackets\ClientPacket.cs" />
+    <Compile Include="networking\cliPackets\CreateGuildPacket.cs" />
+    <Compile Include="networking\cliPackets\CreatePacket.cs" />
+    <Compile Include="networking\cliPackets\EditAccountListPacket.cs" />
+    <Compile Include="networking\cliPackets\EnemyHitPacket.cs" />
+    <Compile Include="networking\cliPackets\EnterArenaPacket.cs" />
+    <Compile Include="networking\cliPackets\EscapePacket.cs" />
+    <Compile Include="networking\cliPackets\FailurePacket.cs" />
+    <Compile Include="networking\cliPackets\GotoAckPacket.cs" />
+    <Compile Include="networking\cliPackets\GroundDamagePacket.cs" />
+    <Compile Include="networking\cliPackets\GuildInvitePacket.cs" />
+    <Compile Include="networking\cliPackets\GuildRemovePacket.cs" />
+    <Compile Include="networking\cliPackets\HelloPacket.cs" />
+    <Compile Include="networking\cliPackets\InvDropPacket.cs" />
+    <Compile Include="networking\cliPackets\InvSwapPacket.cs" />
+    <Compile Include="networking\cliPackets\JoinGuildPacket.cs" />
+    <Compile Include="networking\cliPackets\LeaveArenaPacket.cs" />
+    <Compile Include="networking\cliPackets\LoadPacket.cs" />
+    <Compile Include="networking\cliPackets\MovePacket.cs" />
+    <Compile Include="networking\cliPackets\OtherHitPacket.cs" />
+    <Compile Include="networking\cliPackets\PetCommandPacket.cs" />
+    <Compile Include="networking\cliPackets\PetYardCommandPacket.cs" />
+    <Compile Include="networking\cliPackets\PlayerHitPacket.cs" />
+    <Compile Include="networking\cliPackets\PlayerShootPacket.cs" />
+    <Compile Include="networking\cliPackets\PlayerTextPacket.cs" />
+    <Compile Include="networking\cliPackets\PongPacket.cs" />
+    <Compile Include="networking\cliPackets\RequestTradePacket.cs" />
+    <Compile Include="networking\cliPackets\ReskinPacket.cs" />
+    <Compile Include="networking\cliPackets\SetConditionPacket.cs" />
+    <Compile Include="networking\cliPackets\ShootAckPacket.cs" />
+    <Compile Include="networking\cliPackets\SquareHitPacket.cs" />
+    <Compile Include="networking\cliPackets\TeleportPacket.cs" />
+    <Compile Include="networking\cliPackets\TinkerQuestPacket.cs" />
+    <Compile Include="networking\cliPackets\UpdateAckPacket.cs" />
+    <Compile Include="networking\cliPackets\UseItemPacket.cs" />
+    <Compile Include="networking\cliPackets\UsePortalPacket.cs" />
+    <Compile Include="networking\cliPackets\ViewQuestsPacket.cs" />
+    <Compile Include="networking\Packet.cs" />
+    <Compile Include="networking\svrPackets\AccountListPacket.cs" />
+    <Compile Include="networking\svrPackets\AllyShootPacket.cs" />
+    <Compile Include="networking\svrPackets\AoEPacket.cs" />
+    <Compile Include="networking\svrPackets\ArenaDeathPacket.cs" />
+    <Compile Include="networking\svrPackets\ArenaNextWavePacket.cs" />
+    <Compile Include="networking\svrPackets\BuyResultPacket.cs" />
+    <Compile Include="networking\svrPackets\ClientStatPacket.cs" />
+    <Compile Include="networking\svrPackets\CreateGuildResultPacket.cs" />
+    <Compile Include="networking\svrPackets\Create_SuccessPacket.cs" />
+    <Compile Include="networking\svrPackets\DamagePacket.cs" />
+    <Compile Include="networking\svrPackets\DeathPacket.cs" />
+    <Compile Include="networking\svrPackets\FailurePacket.cs" />
+    <Compile Include="networking\svrPackets\FilePacket.cs" />
+    <Compile Include="networking\svrPackets\Global_NotificationPacket.cs" />
+    <Compile Include="networking\svrPackets\GotoPacket.cs" />
+    <Compile Include="networking\svrPackets\HatchEggPacket.cs" />
+    <Compile Include="networking\svrPackets\InvitedToGuildPacket.cs" />
+    <Compile Include="networking\svrPackets\InvResultPacket.cs" />
+    <Compile Include="networking\svrPackets\MapInfoPacket.cs" />
+    <Compile Include="networking\svrPackets\NameResultPacket.cs" />
+    <Compile Include="networking\svrPackets\NewAbilityUnlockedPacket.cs" />
+    <Compile Include="networking\svrPackets\NewTickPacket.cs" />
+    <Compile Include="networking\svrPackets\NotificationPacket.cs" />
+    <Compile Include="networking\svrPackets\PasswordPromtPacket.cs" />
+    <Compile Include="networking\svrPackets\PetEvolveResultPacket.cs" />
+    <Compile Include="networking\svrPackets\PicPacket.cs" />
+    <Compile Include="networking\svrPackets\PingPacket.cs" />
+    <Compile Include="networking\svrPackets\PlaySoundPacket.cs" />
+    <Compile Include="networking\svrPackets\QuestFetchResponsePacket.cs" />
+    <Compile Include="networking\svrPackets\QuestObjIdPacket.cs" />
+    <Compile Include="networking\svrPackets\QuestRedeemResponsePacket.cs" />
+    <Compile Include="networking\svrPackets\ReconnectPacket.cs" />
+    <Compile Include="networking\svrPackets\RemovePetFromListPacket.cs" />
+    <Compile Include="networking\svrPackets\ServerPacket.cs" />
+    <Compile Include="networking\svrPackets\Shoot2Packet.cs" />
+    <Compile Include="networking\svrPackets\ShootPacket.cs" />
+    <Compile Include="networking\svrPackets\ShowEffectPacket.cs" />
+    <Compile Include="networking\svrPackets\TextPacket.cs" />
+    <Compile Include="networking\svrPackets\TradeAcceptedPacket.cs" />
+    <Compile Include="networking\svrPackets\TradeChangedPacket.cs" />
+    <Compile Include="networking\svrPackets\TradeDonePacket.cs" />
+    <Compile Include="networking\svrPackets\TradeRequestedPacket.cs" />
+    <Compile Include="networking\svrPackets\TradeStartPacket.cs" />
+    <Compile Include="networking\svrPackets\UpdatePacket.cs" />
+    <Compile Include="networking\svrPackets\UpdatePetPacket.cs" />
+    <Compile Include="networking\svrPackets\UpgradePetYardResultPacket.cs" />
+    <Compile Include="networking\svrPackets\VerifyEmailDialogPacket.cs" />
+    <Compile Include="DataSerializing\NReader.cs" />
+    <Compile Include="DataSerializing\NWriter.cs" />
+    <Compile Include="Mod\PacketHandlerExtentionBase.cs" />
+    <Compile Include="PacketIds.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Network.cs" />
+    <Compile Include="Mod\ProxyExtentionBase.cs" />
+    <Compile Include="Server.cs" />
+    <Compile Include="Singleton.cs" />
+    <Compile Include="Stats.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="Mod\WinForm\IWinFormHost.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="common\data\dat0.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="common\data\dat1.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="IProxy.licenseheader" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
