@@ -146,8 +146,8 @@
     <Compile Include="networking\svrPackets\UpdatePetPacket.cs" />
     <Compile Include="networking\svrPackets\UpgradePetYardResultPacket.cs" />
     <Compile Include="networking\svrPackets\VerifyEmailDialogPacket.cs" />
-    <Compile Include="DataSerializing\NReader.cs" />
-    <Compile Include="DataSerializing\NWriter.cs" />
+    <Compile Include="DataSerializing\DReader.cs" />
+    <Compile Include="DataSerializing\DWriter.cs" />
     <Compile Include="Mod\PacketHandlerExtentionBase.cs" />
     <Compile Include="PacketIds.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

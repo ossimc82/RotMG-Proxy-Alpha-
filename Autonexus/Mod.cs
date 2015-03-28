@@ -58,7 +58,7 @@ namespace Autonexus
 
         public string ModVersion
         {
-            get { return "1.0.0"; }
+            get { return "1.0.1"; }
         }
 
         public string Help
@@ -114,27 +114,29 @@ namespace Autonexus
         private int maxHP;
         private int curHP;
         private bool stop;
-
-        private Thread hpCheck;
+        private string map;
 
         public PacketHandler()
         {
             this.maxHP = Int32.MaxValue;
             this.curHP = Int32.MaxValue;
-
-            this.hpCheck = new Thread(new ThreadStart(CheckForHp));
-            this.hpCheck.Start();
         }
 
-        public override bool DisposeAfterDisconnect()
+        public override bool OnClientPacketReceived(ref Packet packet)
         {
-            return true;
+            if (curHP != Int32.MaxValue && maxHP != Int32.MaxValue)
+                if (!checkForAutoNexus()) return false;
+
+            return base.OnClientPacketReceived(ref packet);
         }
 
         public override bool OnServerPacketReceived(ref Packet packet)
         {
             switch (packet.ID)
             {
+                case PacketID.MAPINFO:
+                    this.map = Utils.ChangePacketType<MapInfoPacket>(packet).Name;
+                    break;
                 case PacketID.CREATE_SUCCESS:
                     this.playerObjectId = (packet as Create_SuccessPacket).ObjectID;
                     break;
@@ -173,28 +175,23 @@ namespace Autonexus
                     }
                     break;
             }
+            if (curHP != Int32.MaxValue && maxHP != Int32.MaxValue && packet.ID != PacketID.RECONNECT)
+                if (!checkForAutoNexus()) return false;
+
             return base.OnServerPacketReceived(ref packet);
         }
 
-        public override void OnDisconnect()
+        private bool checkForAutoNexus()
         {
-            this.stop = true;
-        }
-
-        private void CheckForHp()
-        {
-            while(!this.stop)
+            if (this.map == "Nexus") return true;
+            float percent = (100F * (float)curHP / (float)maxHP);
+            float nexusPercent = Singleton<Settings>.Instance.GetValue<float>("autoNexusPercent", "30.0");
+            if (percent <= nexusPercent)
             {
-                if (curHP == Int32.MaxValue || maxHP == Int32.MaxValue) continue;
-
-                float percent = (100F * (float)curHP / (float)maxHP);
-                float nexusPercent = Singleton<Settings>.Instance.GetValue<float>("autoNexusPercent", "30.0");
-                if (percent <= nexusPercent)
-                {
-                    Singleton<Network>.Instance.SendToServer(new EscapePacket());
-                    Thread.Sleep(500);
-                }
+                Singleton<Network>.Instance.SendToServer(new EscapePacket());
+                return false;
             }
+            return true;
         }
     }
 }

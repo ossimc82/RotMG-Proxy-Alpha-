@@ -140,6 +140,7 @@ namespace Proxy
                 Socket skt = m_svrSkt.EndAccept(ar);
                 m_svrSkt.BeginAccept(Listen, null);
 
+                if (m_client != null) m_client.Dispose();
                 m_client = new Client(skt);
             }
             catch (ObjectDisposedException)

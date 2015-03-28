@@ -35,7 +35,7 @@ using log4net;
 
 namespace Proxy
 {
-    public sealed class Client
+    public sealed class Client : IDisposable
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Client));
 
@@ -79,6 +79,16 @@ namespace Proxy
         internal void SendToServer(Packet packet)
         {
             core.SendToServer(packet);
+        }
+
+        public void Disconnect()
+        {
+            core.Disconnect();
+        }
+
+        public void Dispose()
+        {
+            core.Disconnect();
         }
     }
 }
