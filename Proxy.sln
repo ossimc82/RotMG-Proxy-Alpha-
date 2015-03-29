@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autonexus", "Autonexus\Auto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualModHandler", "VisualModHandler\VisualModHandler.csproj", "{560FB6D2-C123-4DFF-B861-6140B16DE650}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealmManager", "RealmManager\RealmManager.csproj", "{F7AA6D0E-A751-46C1-84C0-93D2B7A60D68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{560FB6D2-C123-4DFF-B861-6140B16DE650}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{560FB6D2-C123-4DFF-B861-6140B16DE650}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{560FB6D2-C123-4DFF-B861-6140B16DE650}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7AA6D0E-A751-46C1-84C0-93D2B7A60D68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7AA6D0E-A751-46C1-84C0-93D2B7A60D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7AA6D0E-A751-46C1-84C0-93D2B7A60D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7AA6D0E-A751-46C1-84C0-93D2B7A60D68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

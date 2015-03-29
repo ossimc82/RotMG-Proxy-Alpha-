@@ -36,6 +36,8 @@ namespace IProxy.Mod.WinForm
 
         private readonly List<Type> registeredForms;
 
+        private ManualResetEvent threadPause = new ManualResetEvent(true); 
+
         public Thread FormThread { get; private set; }
         public Form CurrentForm { get; private set; }
         private Type toOpenForm { get; set; }
@@ -55,6 +57,17 @@ namespace IProxy.Mod.WinForm
             if (!registeredForms.Contains(form)) throw new InvalidOperationException("Form is not registered? Maybe a subform?");
             if(CurrentForm != null && (form == CurrentForm.GetType())) return;
             toOpenForm = form;
+            ResumeThread();
+        }
+
+        public void ResumeThread()
+        {
+            this.threadPause.Set();
+        }
+
+        public void PauseThread()
+        {
+            this.threadPause.Reset();
         }
 
         private void FormThreadMethod()
@@ -69,12 +82,15 @@ namespace IProxy.Mod.WinForm
                         toOpenForm = null;
                         Application.Run(CurrentForm = form);
                         CurrentForm = null;
+                        if (toOpenForm == null)
+                            PauseThread();
                     }
                 }
                 catch (Exception ex)
                 {
                     log.ErrorFormat("Error in FormThread: {0}", ex);
                 }
+                threadPause.WaitOne();
             }
         }
 

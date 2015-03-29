@@ -145,7 +145,7 @@ namespace IProxy
         //case StatData._-04I:
         //   param1.condition_[ConditionEffect._-KL]=_loc8_;
         //   break;
-        public readonly static StatsType Tokens = 97;
+        public readonly static StatsType FortuneTokens = 97;
 
         private byte m_type;
 

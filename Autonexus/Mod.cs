@@ -25,6 +25,9 @@ using IProxy.Mod;
 using IProxy.Networking;
 using IProxy.Networking.ClientPackets;
 using IProxy.Networking.ServerPackets;
+using RealmManager.entities;
+using RealmManager.Entities;
+using RealmManager.realm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +46,7 @@ namespace Autonexus
 
         public string Description
         {
-            get { return "Auto nexus with less or equal than 30% hp"; }
+            get { return "Auto nexus with less or equal than the specific amount"; }
         }
 
         public string Creator
@@ -79,6 +82,7 @@ namespace Autonexus
         public ISettingsProvider Register(string modId)
         {
             settings = new SimpleSettings(modId);
+            GetValue<float>("autoNexusPercent", "35.0");
             return Singleton<Settings>.SetInstance(this);
         }
 
@@ -110,21 +114,9 @@ namespace Autonexus
 
     public class PacketHandler : PacketHandlerExtentionBase
     {
-        private int playerObjectId;
-        private int maxHP;
-        private int curHP;
-        private bool stop;
-        private string map;
-
-        public PacketHandler()
-        {
-            this.maxHP = Int32.MaxValue;
-            this.curHP = Int32.MaxValue;
-        }
-
         public override bool OnClientPacketReceived(ref Packet packet)
         {
-            if (curHP != Int32.MaxValue && maxHP != Int32.MaxValue)
+            if (Singleton<Player>.Instance.HP != Int32.MaxValue && Singleton<Player>.Instance.StatValues[Stat.MAX_HP] != Int32.MaxValue && packet.ID != PacketID.HELLO && packet.ID != PacketID.LOAD)
                 if (!checkForAutoNexus()) return false;
 
             return base.OnClientPacketReceived(ref packet);
@@ -132,50 +124,7 @@ namespace Autonexus
 
         public override bool OnServerPacketReceived(ref Packet packet)
         {
-            switch (packet.ID)
-            {
-                case PacketID.MAPINFO:
-                    this.map = Utils.ChangePacketType<MapInfoPacket>(packet).Name;
-                    break;
-                case PacketID.CREATE_SUCCESS:
-                    this.playerObjectId = (packet as Create_SuccessPacket).ObjectID;
-                    break;
-
-                case PacketID.UPDATE:
-                    foreach(var def in (packet as UpdatePacket).NewObjects)
-                    {
-                        if (def.Stats.Id == playerObjectId)
-                        {
-                            foreach (var stat in def.Stats.Stats)
-                            {
-                                if (stat.Key == StatsType.HP)
-                                    curHP = (int)stat.Value;
-
-                                if (stat.Key == StatsType.MaximumHP)
-                                    maxHP = (int)stat.Value;
-                            }
-                        }
-                    }
-                    break;
-
-                case PacketID.NEW_TICK:
-                    foreach (var stat in (packet as NewTickPacket).UpdateStatuses)
-                    {
-                        if (stat.Id == playerObjectId)
-                        {
-                            foreach (var data in stat.Stats)
-                            {
-                                if (data.Key == StatsType.HP)
-                                    curHP = (int)data.Value;
-
-                                if (data.Key == StatsType.MaximumHP)
-                                    maxHP = (int)data.Value;
-                            }
-                        }
-                    }
-                    break;
-            }
-            if (curHP != Int32.MaxValue && maxHP != Int32.MaxValue && packet.ID != PacketID.RECONNECT)
+            if (Singleton<Player>.Instance.HP != Int32.MaxValue && Singleton<Player>.Instance.StatValues[Stat.MAX_HP] != Int32.MaxValue && packet.ID != PacketID.RECONNECT && packet.ID != PacketID.MAPINFO)
                 if (!checkForAutoNexus()) return false;
 
             return base.OnServerPacketReceived(ref packet);
@@ -183,9 +132,9 @@ namespace Autonexus
 
         private bool checkForAutoNexus()
         {
-            if (this.map == "Nexus") return true;
-            float percent = (100F * (float)curHP / (float)maxHP);
-            float nexusPercent = Singleton<Settings>.Instance.GetValue<float>("autoNexusPercent", "30.0");
+            if (Singleton<World>.Instance.Name == "Nexus") return true;
+            float percent = (100F * (float)Singleton<Player>.Instance.HP / (float)Singleton<Player>.Instance.StatValues[Stat.MAX_HP]);
+            float nexusPercent = Singleton<Settings>.Instance.GetValue<float>("autoNexusPercent");
             if (percent <= nexusPercent)
             {
                 Singleton<Network>.Instance.SendToServer(new EscapePacket());

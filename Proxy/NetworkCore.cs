@@ -125,6 +125,7 @@ namespace Proxy
                         m_sendToServer(new RawPacket { id = id, content = content });
                 }
             }
+            catch (ThreadAbortException) { }
             catch (Exception ex)
             {
                 log.Error(ex);
@@ -174,6 +175,7 @@ namespace Proxy
                         m_sendToClient(new RawPacket { id = id, content = content });
                 }
             }
+            catch(ThreadAbortException) { }
             catch (Exception ex)
             {
                 log.Error(ex);
@@ -191,6 +193,10 @@ namespace Proxy
             if (dest != null && dest.Client.IsBound)
                 dest.Close();
 
+            if (cliRecWkr.ThreadState != ThreadState.Running)
+                cliRecWkr.Abort();
+            if (svrRecWkr.ThreadState != ThreadState.Running)
+                svrRecWkr.Abort();
             Singleton<ModHandler>.Instance.Disconnect();
         }
 
@@ -213,11 +219,15 @@ namespace Proxy
             if (!clientSocket.Connected) return;
             lock (clientSend)
             {
-                var wtr = new DWriter(new NetworkStream(clientSocket));
-                wtr.Write(packet.content.Length + PACKET_HEADER_SIZE);
-                wtr.Write(packet.id);
-                wtr.Write(ClientSendKey.Crypt(packet.content));
-                wtr.Flush();
+                try
+                {
+                    var wtr = new DWriter(new NetworkStream(clientSocket));
+                    wtr.Write(packet.content.Length + PACKET_HEADER_SIZE);
+                    wtr.Write(packet.id);
+                    wtr.Write(ClientSendKey.Crypt(packet.content));
+                    wtr.Flush();
+                }
+                catch (IOException) { } //Only occures when the socket is closed.
             }
         }
 
@@ -226,11 +236,15 @@ namespace Proxy
             if (!dest.Connected) return;
             lock (serverSend)
             {
-                var wtr = new DWriter(new NetworkStream(dest.Client));
-                wtr.Write(packet.content.Length + PACKET_HEADER_SIZE);
-                wtr.Write(packet.id);
-                wtr.Write(ServerSendKey.Crypt(packet.content));
-                wtr.Flush();
+                try
+                {
+                    var wtr = new DWriter(new NetworkStream(dest.Client));
+                    wtr.Write(packet.content.Length + PACKET_HEADER_SIZE);
+                    wtr.Write(packet.id);
+                    wtr.Write(ServerSendKey.Crypt(packet.content));
+                    wtr.Flush();
+                }
+                catch (IOException) { } //Only occures when the socket is closed.
             }
         }
     }

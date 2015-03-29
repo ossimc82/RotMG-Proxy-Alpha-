@@ -19,55 +19,29 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-
-/*
- * You may think you know what the following code does.
- * But you dont. Trust me.
- * Fiddle with it, and youll spend many a sleepless
- * night cursing the moment you thought youd be clever
- * enough to "optimize" the code below.
- * Now close this file and go play with something else.
- */ 
-
+using IProxy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IProxy
+namespace RealmManager.Entities
 {
-    public sealed class Singleton<T> where T : class, new()
+    public class Character : Entity
     {
-        private static bool m_sealed;
-        private static T m_instance;
-
-        private Singleton() { }
-
-        public static T Instance
+        public Character(int objType)
+            : base(objType)
         {
-            get
-            {
-                if (m_instance == null && !m_sealed)
-                    m_instance = new T();
-                return m_instance;
-            }
+            HP = Int32.MaxValue;
         }
 
-        public static bool IsSealed { get { return m_sealed; } }
-
-        public static T SetInstance(T instance, bool seal = true)
+        internal override void ImportStats(StatsType stat, object val)
         {
-            if (m_sealed) throw new InvalidOperationException("Singleton is sealed. Can't set instance");
-            if(!m_sealed)
-                m_instance = instance;
-            m_sealed = seal;
-            return instance;
+            if (stat == StatsType.HP) HP = (int)val;
+            base.ImportStats(stat, val);
         }
 
-        public static void Seal()
-        {
-            m_sealed = true;
-        }
+        public int HP { get; protected set; }
     }
 }

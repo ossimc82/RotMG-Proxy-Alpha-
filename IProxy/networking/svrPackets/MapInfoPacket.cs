@@ -27,9 +27,9 @@ namespace IProxy.Networking.ServerPackets
         public int Width { get; set; }
         public int Height { get; set; }
         public string Name { get; set; }
-        public string ClientWorldName { get; set; }
+        public string LanguageString { get; set; }
         public int Difficulty { get; set; }
-        public uint Fp { get; set; }
+        public uint Seed { get; set; }
         public int Background { get; set; }
         public bool AllowTeleport { get; set; }
         public bool ShowDisplays { get; set; }
@@ -51,8 +51,8 @@ namespace IProxy.Networking.ServerPackets
             Width = rdr.ReadInt32();
             Height = rdr.ReadInt32();
             Name = rdr.ReadUTF();
-            ClientWorldName = rdr.ReadUTF();
-            Fp = rdr.ReadUInt32();
+            LanguageString = rdr.ReadUTF();
+            Seed = rdr.ReadUInt32();
             Background = rdr.ReadInt32();
             Difficulty = rdr.ReadInt32();
             AllowTeleport = rdr.ReadBoolean();
@@ -71,8 +71,8 @@ namespace IProxy.Networking.ServerPackets
             wtr.Write(Width);
             wtr.Write(Height);
             wtr.WriteUTF(Name);
-            wtr.WriteUTF(ClientWorldName);
-            wtr.Write(Fp);
+            wtr.WriteUTF(LanguageString);
+            wtr.Write(Seed);
             wtr.Write(Background);
             wtr.Write(Difficulty);
             wtr.Write(AllowTeleport);
