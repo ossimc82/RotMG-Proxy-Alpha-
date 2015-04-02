@@ -21,10 +21,13 @@
 //SOFTWARE.
 using IProxy.common.data;
 using IProxy.Networking;
+using IProxy.Networking.ServerPackets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IProxy
 {
@@ -34,6 +37,13 @@ namespace IProxy
 
         public event PacketDelegate OnSendToServer;
         public event PacketDelegate OnSendToClient;
+
+        public Client Client { get; private set; }
+
+        public Network()
+        {
+            Client = new Client(this);
+        }
 
         public void SendToServer(Packet packet)
         {
@@ -45,6 +55,68 @@ namespace IProxy
         {
             if (OnSendToClient != null)
                 OnSendToClient(packet);
+        }
+
+        public void After(int milliseconds, Action action)
+        {
+            new Timer(new TimerCallback((obj) =>
+            {
+                Task.Factory.StartNew(obj as Action);
+            }), action, milliseconds, Timeout.Infinite);
+        }
+    }
+
+    public struct Client
+    {
+        private Network network;
+
+        public Client(Network network)
+        {
+            this.network = network;
+        }
+
+        public void SendInfo(string text)
+        {
+            SendTell("", text);
+        }
+
+        public void SendHelp(string text)
+        {
+            SendTell("*Help*", text);
+        }
+
+        public void SendError(string text)
+        {
+            SendTell("*Error*", text);
+        }
+
+        public void SendGuild(string text)
+        {
+            SendTell("*Guild*", text);
+        }
+
+        public void SendEnemy(string enemy, string text)
+        {
+            SendTell("#" + enemy, text);
+        }
+
+        public void SendAnnouncement(string text)
+        {
+            SendTell("@ANNOUNCEMENT", text);
+        }
+
+        public void SendTell(string from, string text, string to="", int objId=-1, int stars=-1)
+        {
+            network.SendToClient(new TextPacket
+            {
+                BubbleTime = 10,
+                Name = from,
+                ObjectId = objId,
+                Recipient = to,
+                Stars = stars,
+                Text = text,
+                CleanText = ""
+            });
         }
     }
 }

@@ -30,6 +30,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Proxy
 {
@@ -40,8 +41,7 @@ namespace Proxy
         public const int PACKET_HEADER_SIZE = 5;
 
         private Socket clientSocket;
-        private Thread cliRecWkr;
-        private Thread svrRecWkr;
+        private Thread wkr;
         private Client parent;
         private TcpClient dest;
 
@@ -82,10 +82,14 @@ namespace Proxy
             dest = new TcpClient();
             dest.Connect(Singleton<Server>.Instance.CurrentHost, 2050);
 
-            cliRecWkr = new Thread(ReadFromClient);
-            cliRecWkr.Start();
-            svrRecWkr = new Thread(ReadFromServer);
-            svrRecWkr.Start();
+            wkr = new Thread(StartNetworkTasks);
+            wkr.Start();
+        }
+
+        private void StartNetworkTasks()
+        {
+            Task.Factory.StartNew(ReadFromClient);
+            Task.Factory.StartNew(ReadFromServer);
         }
 
         private void ReadFromClient()
@@ -125,7 +129,7 @@ namespace Proxy
                         m_sendToServer(new RawPacket { id = id, content = content });
                 }
             }
-            catch (ThreadAbortException) { }
+            catch (ObjectDisposedException) { }
             catch (Exception ex)
             {
                 log.Error(ex);
@@ -175,7 +179,7 @@ namespace Proxy
                         m_sendToClient(new RawPacket { id = id, content = content });
                 }
             }
-            catch(ThreadAbortException) { }
+            catch(ObjectDisposedException) { }
             catch (Exception ex)
             {
                 log.Error(ex);
@@ -193,10 +197,9 @@ namespace Proxy
             if (dest != null && dest.Client.IsBound)
                 dest.Close();
 
-            if (cliRecWkr.ThreadState != ThreadState.Running)
-                cliRecWkr.Abort();
-            if (svrRecWkr.ThreadState != ThreadState.Running)
-                svrRecWkr.Abort();
+            if (wkr.ThreadState != ThreadState.Running)
+                wkr.Abort();
+
             Singleton<ModHandler>.Instance.Disconnect();
         }
 
@@ -227,7 +230,9 @@ namespace Proxy
                     wtr.Write(ClientSendKey.Crypt(packet.content));
                     wtr.Flush();
                 }
-                catch (IOException) { } //Only occures when the socket is closed.
+                //Only occures when the socket is closed.
+                catch (ObjectDisposedException) { }
+                catch (IOException) { }
             }
         }
 
@@ -244,7 +249,9 @@ namespace Proxy
                     wtr.Write(ServerSendKey.Crypt(packet.content));
                     wtr.Flush();
                 }
-                catch (IOException) { } //Only occures when the socket is closed.
+                //Only occures when the socket is closed.
+                catch (ObjectDisposedException) { }
+                catch (IOException) { }
             }
         }
     }

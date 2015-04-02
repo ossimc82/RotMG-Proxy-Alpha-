@@ -30,6 +30,7 @@ using RealmManager.Entities;
 using RealmManager.realm;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -56,12 +57,12 @@ namespace Autonexus
 
         public string RequiredMinimumProxyVersion
         {
-            get { return "1.0.0"; }
+            get { return "1.1.0"; }
         }
 
         public string ModVersion
         {
-            get { return "1.0.1"; }
+            get { return "1.0.2"; }
         }
 
         public string Help
@@ -112,11 +113,11 @@ namespace Autonexus
         }
     }
 
-    public class PacketHandler : PacketHandlerExtentionBase
+    public class PacketHandler : PacketHandlerExtentionBase, ICommandManager
     {
         public override bool OnClientPacketReceived(ref Packet packet)
         {
-            if (Singleton<Player>.Instance.HP != Int32.MaxValue && Singleton<Player>.Instance.StatValues[Stat.MAX_HP] != Int32.MaxValue && packet.ID != PacketID.HELLO && packet.ID != PacketID.LOAD)
+            if (Singleton<Player>.Instance.HP != Int32.MaxValue && Singleton<Player>.Instance.StatValues[Stat.MAX_HP] != 0 && packet.ID != PacketID.HELLO && packet.ID != PacketID.LOAD)
                 if (!checkForAutoNexus()) return false;
 
             return base.OnClientPacketReceived(ref packet);
@@ -124,7 +125,7 @@ namespace Autonexus
 
         public override bool OnServerPacketReceived(ref Packet packet)
         {
-            if (Singleton<Player>.Instance.HP != Int32.MaxValue && Singleton<Player>.Instance.StatValues[Stat.MAX_HP] != Int32.MaxValue && packet.ID != PacketID.RECONNECT && packet.ID != PacketID.MAPINFO)
+            if (Singleton<Player>.Instance.HP != Int32.MaxValue && Singleton<Player>.Instance.StatValues[Stat.MAX_HP] != 0 && packet.ID != PacketID.RECONNECT && packet.ID != PacketID.MAPINFO)
                 if (!checkForAutoNexus()) return false;
 
             return base.OnServerPacketReceived(ref packet);
@@ -139,6 +140,38 @@ namespace Autonexus
             {
                 Singleton<Network>.Instance.SendToServer(new EscapePacket());
                 return false;
+            }
+            return true;
+        }
+
+        public IEnumerable<string> RegisterCommands()
+        {
+            yield return "autonexus";
+        }
+
+        public bool OnCommandGet(string command, string[] args)
+        {
+            switch (command)
+            {
+                case "autonexus":
+                    float percent;
+
+                    if (args.Length == 0)
+                    {
+                        Singleton<Network>.Instance.Client.SendHelp("Usage: /autonexus <HP in Percent (0.0 - 100.0)>");
+                        return false;
+                    }
+
+                    if (!Single.TryParse(args[0], NumberStyles.Any, CultureInfo.InvariantCulture, out percent))
+                    {
+                        Singleton<Network>.Instance.Client.SendError(String.Format("{0} is not a float", args[0]));
+                        return false;
+                    }
+                    Console.WriteLine(percent);
+                    Singleton<Settings>.Instance.SetValue("autoNexusPercent", percent.ToString("R"));
+                    Singleton<Network>.Instance.Client.SendInfo(String.Format("Settings saved. Autonexus at {0}%", Singleton<Settings>.Instance.GetValue<float>("autoNexusPercent").ToString("R")));
+                    Singleton<Settings>.Instance.Save();
+                    return false;
             }
             return true;
         }

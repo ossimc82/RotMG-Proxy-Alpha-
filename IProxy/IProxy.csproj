@@ -50,6 +50,7 @@
     <Compile Include="common\data\XmlDatas.cs" />
     <Compile Include="common\SimpleSettings.cs" />
     <Compile Include="common\WeakDictionary.cs" />
+    <Compile Include="Mod\ICommandManager.cs" />
     <Compile Include="Mod\IProxyMod.cs" />
     <Compile Include="Mod\ISettingsProvider.cs" />
     <Compile Include="Mod\WinForm\WinFormProviderExtentionBase.cs" />

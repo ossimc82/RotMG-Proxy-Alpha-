@@ -52,7 +52,7 @@ namespace RealmManager
 
         public string RequiredMinimumProxyVersion
         {
-            get { return "1.0.0"; }
+            get { return "1.1.0"; }
         }
 
         public string ModVersion

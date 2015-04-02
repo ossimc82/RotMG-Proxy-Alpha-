@@ -46,23 +46,20 @@ public static class Utils
     /// </returns>
     public static bool IsNullOrWhiteSpace(this string value)
     {
-        if (value == null)
-        {
-            return true;
-        }
+        if (value == null) return true;
+
         int index = 0;
         while (index < value.Length)
-        {
             if (char.IsWhiteSpace(value[index]))
-            {
                 index++;
-            }
             else
-            {
                 return false;
-            }
-        }
         return true;
+    }
+
+    public static string TextToLanguageString(string text)
+    {
+        return "{\"key\":\"blank\",\"tokens\":{\"data\":\"" + text + "\"}}";
     }
 
     public static string To4Hex(short x)

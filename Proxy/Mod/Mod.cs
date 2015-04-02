@@ -63,16 +63,22 @@ namespace Proxy
         public AssemblyRequestExtentionBase AssemblyRequestExtentionBase { get; private set; }
         public WinFormProviderExtentionBase WinFormProviderExtentionBase { get; private set; }
         public ISettingsProvider Settings { get; private set; }
-
+        public ICommandManager CommandManager { get; private set; }
         public IProxyMod Information { get { return this.userMod; } }
 
         public bool Enabled { get; private set; }
 
-        internal void Initialize()
+        internal void Initialize(ref IEnumerable<string> commands)
         {
             PacketHandlerExtentionBase = CreateModInstance<PacketHandlerExtentionBase>();
             AssemblyRequestExtentionBase = CreateModInstance<AssemblyRequestExtentionBase>();
             WinFormProviderExtentionBase = CreateModInstance<WinFormProviderExtentionBase>();
+
+            if (PacketHandlerExtentionBase is ICommandManager)
+                CommandManager = (PacketHandlerExtentionBase as ICommandManager);
+            else CommandManager = CreateModInstance<ICommandManager>();
+
+            if (CommandManager != null) commands = CommandManager.RegisterCommands();
 
             if ((winFormHost = CreateModInstance<IWinFormHost>()) != null && WinFormProviderExtentionBase != null && winFormHost.RunOnLoad())
             {

@@ -22,6 +22,7 @@
 using IProxy;
 using IProxy.Mod;
 using IProxy.Networking;
+using IProxy.Networking.ClientPackets;
 using IProxy.Networking.ServerPackets;
 using log4net;
 using System;
@@ -32,23 +33,36 @@ using System.Text;
 
 namespace Proxy
 {
-    public sealed class ModHandler : IDisposable
+    public sealed class ModHandler : IDisposable, IEnumerable<Mod>
     {
-        public const string PROXY_MOD_VERSION = "1.0.0";
-        public const string MINIMUM_PROXYMOD_VERSION = "0.0.1";
+        public const string PROXY_MOD_VERSION = "1.1.0";
+        public const string MINIMUM_PROXYMOD_VERSION = "1.1.0";
+
+        private Dictionary<IProxyMod, Mod> m_mods;
+        private Dictionary<string, Assembly> m_modDependencyAssemblies;
+        private Dictionary<string, Mod> m_registeredCommands;
 
         private readonly static ILog log = LogManager.GetLogger(typeof(ModHandler));
 
-        public static Dictionary<IProxyMod, Mod> Mods = new Dictionary<IProxyMod, Mod>();
-
-        public static Dictionary<string, Assembly> ModDependencyAssemblies = new Dictionary<string, Assembly>();
-
         public ModHandler()
         {
+            m_mods = new Dictionary<IProxyMod, Mod>();
+            m_modDependencyAssemblies = new Dictionary<string, Assembly>();
+            m_registeredCommands = new Dictionary<string, Mod>();
+
             Singleton<ModHandler>.SetInstance(this);
             Singleton<Network>.Instance.OnSendToServer += ModHandler_OnSendToServer;
             Singleton<Network>.Instance.OnSendToClient += ModHandler_OnSendToClient;
             Singleton<Network>.Seal();
+        }
+
+        public Dictionary<string, Assembly> Assemblies { get { return m_modDependencyAssemblies; } }
+
+        public int ModCount { get { return this.m_mods.Count; } }
+
+        public Mod this[IProxyMod mod]
+        {
+            get { return m_mods[mod]; }
         }
 
         private void ModHandler_OnSendToClient(Packet packet)
@@ -63,14 +77,14 @@ namespace Proxy
 
         internal void Disconnect()
         {
-            foreach (var mod in Mods.Values)
+            foreach (var mod in m_mods.Values)
                 mod.Disconnect();
         }
 
         internal bool OnServerPacketReceive(ref Packet packet)
         {
             bool ret = true;
-            foreach (var mod in Mods.Values.Where(_ => _.Enabled && _.PacketHandlerExtentionBase != null))
+            foreach (var mod in m_mods.Values.Where(_ => _.Enabled && _.PacketHandlerExtentionBase != null))
             {
                 try
                 {
@@ -88,7 +102,24 @@ namespace Proxy
         internal bool OnClientPacketReceive(ref Packet packet)
         {
             bool ret = true;
-            foreach (var mod in Mods.Values.Where(_ => _.Enabled && _.PacketHandlerExtentionBase != null))
+
+            if (packet is PlayerTextPacket)
+            {
+                string commandString = Utils.ChangePacketType<PlayerTextPacket>(packet).Text;
+                if (commandString.StartsWith("/"))
+                {
+                    commandString = commandString.Remove(0, 1);
+                    if (m_registeredCommands.ContainsKey(commandString.Split(' ')[0]))
+                    {
+                        string command = commandString.Split(' ')[0];
+                        string[] args = commandString.Replace(command, String.Empty).Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (!m_registeredCommands[command].CommandManager.OnCommandGet(command, args)) return false;
+                    }
+                }
+            }
+
+            foreach (var mod in m_mods.Values.Where(_ => _.Enabled && _.PacketHandlerExtentionBase != null))
             {
                 try
                 {
@@ -105,14 +136,14 @@ namespace Proxy
 
         public void DisableMod(IProxyMod mod)
         {
-            if (Mods.ContainsKey(mod))
-                Mods[mod].Disable();
+            if (m_mods.ContainsKey(mod))
+                m_mods[mod].Disable();
         }
 
         public void EnableMod(IProxyMod mod)
         {
-            if (Mods.ContainsKey(mod))
-                Mods[mod].Enable();
+            if (m_mods.ContainsKey(mod))
+                m_mods[mod].Enable();
         }
 
         // sometimes I believe compiler ignores all my comments
@@ -134,11 +165,23 @@ namespace Proxy
                 {
                     if (proxyVersion > modVersion)
                         log.WarnFormat("[{0}] Modloader version is higher than the required version. Some features may not work correctly.", userMod.Name);
-                    Mods.Add(userMod, new Mod(userMod, assembly));
-                    Mods[userMod].Initialize();
+                    m_mods.Add(userMod, new Mod(userMod, assembly));
+                    IEnumerable<string> commands = new string[0];
+                    m_mods[userMod].Initialize(ref commands);
+
+                    foreach (var command in commands)
+                    {
+                        string commandStr = command.StartsWith("/") ? command.Remove(0, 1) : command;
+                        if (m_registeredCommands.ContainsKey(commandStr))
+                        {
+                            log.WarnFormat("[ModHandler] Duplicated command: \"{0}\", ignoring.", commandStr);
+                            continue;
+                        }
+                        m_registeredCommands.Add(commandStr, m_mods[userMod]);
+                    }
                 }
                 else
-                    log.ErrorFormat("[{0}] Minimum proxy version required required: {1}", userMod.Name, minProxyModVersion.ToString());
+                    log.ErrorFormat("[{0}] Minimum proxy version required: {1}", userMod.Name, minProxyModVersion.ToString());
             }
             else
                 log.ErrorFormat("[{0}] Proxy outdated, min required version: {1}", userMod.Name, modVersion);
@@ -146,19 +189,19 @@ namespace Proxy
 
         internal void LoadModAssemblies()
         {
-            foreach (var mod in Mods.Values)
+            foreach (var mod in m_mods.Values)
             {
                 if (mod.AssemblyRequestExtentionBase != null)
                 {
                     foreach (var assembly in mod.AssemblyRequestExtentionBase.GetDependencyAssemblies())
                     {
-                        if (ModDependencyAssemblies.ContainsKey(assembly.FullName))
+                        if (m_modDependencyAssemblies.ContainsKey(assembly.FullName))
                         {
                             log.WarnFormat("Skip Loading Dependency for mod [{0}]\nAssembly already loaded:\n{1}", mod.Information.Name, assembly.FullName);
                             continue;
                         }
                         log.InfoFormat("[{0}] Loading Dependency:\n{1}", mod.Information.Name, assembly.FullName);
-                        ModDependencyAssemblies.Add(assembly.FullName, assembly);
+                        m_modDependencyAssemblies.Add(assembly.FullName, assembly);
                     }
                 }
             }
@@ -166,8 +209,55 @@ namespace Proxy
 
         public void Dispose()
         {
-            foreach (var mod in Mods)
+            foreach (var mod in m_mods)
                 mod.Value.Dispose();
+        }
+
+        public IEnumerator<Mod> GetEnumerator()
+        {
+            return new ModHandlerEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return new ModHandlerEnumerator();
+        }
+
+        public class ModHandlerEnumerator : IEnumerator<Mod>
+        {
+            private List<Mod> m_items;
+            private int m_index;
+
+            public ModHandlerEnumerator()
+            {
+                this.m_items = Singleton<ModHandler>.Instance.m_mods.Select(_ => _.Value).ToList<Mod>();
+                this.m_index = -1;
+            }
+
+            public Mod Current
+            {
+                get { return this.m_items[this.m_index]; }
+            }
+
+            public void Dispose()
+            {
+            }
+
+            object System.Collections.IEnumerator.Current
+            {
+                get { return this.m_items[this.m_index]; }
+            }
+
+            public bool MoveNext()
+            {
+                this.m_index++;
+                return m_index < m_items.Count;
+            }
+
+            public void Reset()
+            {
+                this.m_index = -1;
+            }
         }
     }
 }

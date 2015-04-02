@@ -50,8 +50,7 @@ namespace IProxy.Networking.ServerPackets
             GameId = rdr.ReadInt32();
             KeyTime = rdr.ReadInt32();
             IsFromArena = rdr.ReadBoolean();
-            Key = new byte[rdr.ReadInt16()];
-            Key = rdr.ReadBytes(Key.Length);
+            Key = rdr.ReadBytes(rdr.ReadInt16());
         }
 
         protected override void Write(DWriter wtr)

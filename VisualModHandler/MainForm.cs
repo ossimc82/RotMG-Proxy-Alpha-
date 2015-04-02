@@ -44,18 +44,18 @@ namespace VisualModHandler
         {
             mods = new Dictionary<string, IProxyMod>();
             InitializeComponent();
-            label1.Text = "Mods: " + ModHandler.Mods.Count;
+            label1.Text = "Mods: " + Singleton<ModHandler>.Instance.ModCount;
             listBox1.SelectionMode = SelectionMode.One;
-            foreach(var mod in ModHandler.Mods)
+            foreach(var mod in Singleton<ModHandler>.Instance)
             {
-                listBox1.Items.Add(mod.Value.Information.Name);
-                mods.Add(mod.Value.Information.Name, mod.Key);
-                if (mod.Key.Name == Singleton<Mod>.Instance.Name) continue;
-                if (!mod.Value.Enabled && Singleton<Settings>.Instance.GetValue<bool>("Enabled_" + mod.Key.Name.Replace(" ", String.Empty), "true"))
-                    mod.Value.Enable();
+                listBox1.Items.Add(mod.Information.Name);
+                mods.Add(mod.Information.Name, mod.Information);
+                if (mod.Information.Name == Singleton<Mod>.Instance.Name) continue;
+                if (!mod.Enabled && Singleton<Settings>.Instance.GetValue<bool>("Enabled_" + mod.Information.Name.Replace(" ", String.Empty), "true"))
+                    mod.Enable();
 
-                if (mod.Value.Enabled && !Singleton<Settings>.Instance.GetValue<bool>("Enabled_" + mod.Key.Name.Replace(" ", String.Empty), "true"))
-                    mod.Value.Disable();
+                if (mod.Enabled && !Singleton<Settings>.Instance.GetValue<bool>("Enabled_" + mod.Information.Name.Replace(" ", String.Empty), "true"))
+                    mod.Disable();
             }
             listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
             modToggleButton.Click += modToggleButton_Click;
@@ -65,7 +65,7 @@ namespace VisualModHandler
 
         private void modSettingsButton_Click(object sender, EventArgs e)
         {
-            var settingsForm = new ModSettingsForm(ModHandler.Mods[selectedMod].Settings, selectedMod);
+            var settingsForm = new ModSettingsForm(Singleton<ModHandler>.Instance[selectedMod].Settings, selectedMod);
             settingsForm.StartPosition = FormStartPosition.CenterParent;
             settingsForm.ShowDialog(this);
         }
@@ -74,12 +74,12 @@ namespace VisualModHandler
         {
             if (modToggleButton.Text == "Enable Mod")
             {
-                ModHandler.Mods[selectedMod].Enable();
+                Singleton<ModHandler>.Instance[selectedMod].Enable();
                 Singleton<Settings>.Instance.SetValue("Enabled_" + selectedMod.Name.Replace(" ", String.Empty), "true");
             }
             else
             {
-                ModHandler.Mods[selectedMod].Disable();
+                Singleton<ModHandler>.Instance[selectedMod].Disable();
                 Singleton<Settings>.Instance.SetValue("Enabled_" + selectedMod.Name.Replace(" ", String.Empty), "false");
             }
 
@@ -99,18 +99,20 @@ namespace VisualModHandler
 
         private void updateInfo()
         {
-            currentModBox.Text = selectedMod.Name + (!ModHandler.Mods[selectedMod].Enabled ? " [Disabled]" : String.Empty);
+            currentModBox.Text = selectedMod.Name + (!Singleton<ModHandler>.Instance[selectedMod].Enabled ? " [Disabled]" : String.Empty);
             modCreator.Text = "Made by: " + selectedMod.Creator;
-            modVersion.Text = "Version " + selectedMod.ModVersion;
+            modVersion.Text = "Version: " + selectedMod.ModVersion;
             modDesc.Text = selectedMod.Description;
             modHelp.Text = String.IsNullOrWhiteSpace(selectedMod.Help) ? "No help available" : selectedMod.Help.Replace("\n", Environment.NewLine);
-            modToggleButton.Text = ModHandler.Mods[selectedMod].Enabled ? "Disable Mod" : "Enable Mod";
-            modToggleButton.Enabled = ModHandler.Mods[selectedMod].Information.Name != Singleton<Mod>.Instance.Name;
+            modToggleButton.Text = Singleton<ModHandler>.Instance[selectedMod].Enabled ? "Disable Mod" : "Enable Mod";
+            modToggleButton.Enabled = Singleton<ModHandler>.Instance[selectedMod].Information.Name != Singleton<Mod>.Instance.Name;
 
-            if (ModHandler.Mods[selectedMod].Settings != null && ModHandler.Mods[selectedMod].Information.Name != Singleton<Mod>.Instance.Name)
+            if (Singleton<ModHandler>.Instance[selectedMod].Settings != null && Singleton<ModHandler>.Instance[selectedMod].Information.Name != Singleton<Mod>.Instance.Name)
                 modSettingsButton.Enabled = true;
             else 
                 modSettingsButton.Enabled = false;
         }
+
+        public IProxyMod ModHandler { get; set; }
     }
 }

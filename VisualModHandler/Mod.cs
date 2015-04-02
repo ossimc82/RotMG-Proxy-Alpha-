@@ -53,12 +53,12 @@ namespace VisualModHandler
 
         public string RequiredMinimumProxyVersion
         {
-            get { return "1.0.0"; }
+            get { return "1.1.0"; }
         }
 
         public string ModVersion
         {
-            get { return "1.0.0"; }
+            get { return "1.1.0"; }
         }
 
         public string Help
@@ -72,21 +72,22 @@ namespace VisualModHandler
         }
     }
 
-    public class PacketHandler : PacketHandlerExtentionBase
+    public class CommandManager : ICommandManager
     {
-        public override bool OnClientPacketReceived(ref Packet packet)
+        public IEnumerable<string> RegisterCommands()
         {
-            switch (packet.ID)
+            yield return "visual";
+        }
+
+        public bool OnCommandGet(string command, string[] args)
+        {
+            switch (command)
             {
-                case PacketID.PLAYERTEXT:
-                    if (Utils.ChangePacketType<PlayerTextPacket>(packet).Text == "/visual")
-                    {
-                        Singleton<FormHost>.Instance.SetNextForm(typeof(MainForm));
-                        return false;
-                    }
-                    break;
+                case "visual":
+                    Singleton<FormHost>.Instance.SetNextForm(typeof(MainForm));
+                    return false;
             }
-            return base.OnClientPacketReceived(ref packet);
+            return true;
         }
     }
 

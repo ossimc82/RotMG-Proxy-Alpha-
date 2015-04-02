@@ -27,9 +27,9 @@ namespace IProxy.Networking.ClientPackets
         public string BuildVersion { get; set; }
         public int GameId { get; set; }
         public string GUID { get; set; }
-        public int randomInt1 { get; set; }
+        public int RandomInt1 { get; set; }
         public string Password { get; set; }
-        public int randomInt2 { get; set; }
+        public int RandomInt2 { get; set; }
         public string Secret { get; set; }
         public int KeyTime { get; set; }
         public byte[] Key { get; set; }
@@ -55,9 +55,9 @@ namespace IProxy.Networking.ClientPackets
             BuildVersion = rdr.ReadUTF();
             GameId = rdr.ReadInt32();
             GUID = rdr.ReadUTF();
-            randomInt1 = rdr.ReadInt32(); //random int
+            RandomInt1 = rdr.ReadInt32(); //random int
             Password = rdr.ReadUTF();
-            randomInt2 = rdr.ReadInt32(); //random int
+            RandomInt2 = rdr.ReadInt32(); //random int
             Secret = rdr.ReadUTF();
             KeyTime = rdr.ReadInt32();
             Key = rdr.ReadBytes(rdr.ReadInt16());
@@ -74,9 +74,9 @@ namespace IProxy.Networking.ClientPackets
             wtr.WriteUTF(BuildVersion);
             wtr.Write(GameId);
             wtr.WriteUTF(GUID);
-            wtr.Write(randomInt1);
+            wtr.Write(RandomInt1);
             wtr.WriteUTF(Password);
-            wtr.Write(randomInt2);
+            wtr.Write(RandomInt2);
             wtr.WriteUTF(Secret);
             wtr.Write(KeyTime);
             wtr.Write((short)Key.Length);

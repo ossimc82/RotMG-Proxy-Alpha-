@@ -39,6 +39,8 @@ namespace IProxy
 {
     public sealed class Singleton<T> where T : class, new()
     {
+        private static readonly object m_instanceLock = new object();
+
         private static bool m_sealed;
         private static T m_instance;
 
@@ -48,8 +50,11 @@ namespace IProxy
         {
             get
             {
-                if (m_instance == null && !m_sealed)
-                    m_instance = new T();
+                if (m_instance == null && !m_sealed) //Check if null
+                    lock (m_instanceLock) //lock instance for threads
+                        if (m_instance == null && !m_sealed) //check again if null so that the instance wont be created twice
+                            m_instance = new T();
+
                 return m_instance;
             }
         }
