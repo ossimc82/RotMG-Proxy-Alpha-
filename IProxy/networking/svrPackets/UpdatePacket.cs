@@ -47,7 +47,7 @@ namespace IProxy.Networking.ServerPackets
                 {
                     X = rdr.ReadInt16(),
                     Y = rdr.ReadInt16(),
-                    Tile = rdr.ReadUInt16()
+                    Tile = rdr.ReadInt16()
                 };
             }
 

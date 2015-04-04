@@ -22,7 +22,7 @@
 using IProxy.DataSerializing;
 namespace IProxy.Networking.ServerPackets
 {
-    public class Create_SuccessPacket : ServerPacket
+    public class CreateSuccessPacket : ServerPacket
     {
         public int ObjectID { get; set; }
         public int CharacterID { get; set; }
@@ -34,7 +34,7 @@ namespace IProxy.Networking.ServerPackets
 
         public override Packet CreateInstance()
         {
-            return new Create_SuccessPacket();
+            return new CreateSuccessPacket();
         }
 
         protected override void Read(DReader rdr)

@@ -73,56 +73,54 @@ namespace MapRipper
         }
     }
 
-    public class MapRipper : PacketHandlerExtentionBase, ICommandManager
+    public class MapRipper : AdvancedPacketHandlerExtentionBase, ICommandManager
     {
         private JsonMap map;
 
-        public override bool OnServerPacketReceived(ref Packet packet)
+        protected override void HookPackets()
         {
-            switch (packet.ID)
-            {
-                case PacketID.MAPINFO:
-                    var mip = Utils.ChangePacketType<MapInfoPacket>(packet);
-                    this.map.Init(mip.Width, mip.Height, mip.Name);
-                    break;
-                case PacketID.UPDATE:
-                    var update = Utils.ChangePacketType<UpdatePacket>(packet);
-                    foreach (var t in update.Tiles)
-                        this.map.Tiles[t.X][t.Y] = t.Tile;
-
-                    foreach (var tileDef in update.NewObjects)
-                    {
-                        var def = tileDef;
-                        var objectClass = Singleton<XmlData>.Instance.ObjectTypeToElement[def.ObjectType].Element("Class").Value;
-                        if (objectClass == "Player") continue;
-
-                        if (objectClass != "Enemy" && objectClass != "Character")
-                        {
-                            def.Stats.Position.X -= 0.5F;
-                            def.Stats.Position.Y -= 0.5F;
-                        }
-
-                        int _x = (int)def.Stats.Position.X;
-                        int _y = (int)def.Stats.Position.Y;
-                        Array.Resize(ref map.Entities[_x][_y], map.Entities[_x][_y].Length + 1);
-                        ObjectDef[] arr = map.Entities[_x][_y];
-
-                        arr[arr.Length - 1] = def;
-                    }
-                    break;
-            }
-            return base.OnServerPacketReceived(ref packet);
+            ApplyPacketHook<MapInfoPacket>(OnMapInfoPacket);
+            ApplyPacketHook<UpdatePacket>(OnUpdatePacket);
+            ApplyPacketHook<HelloPacket>(OnHelloPacket);
         }
 
-        public override bool OnClientPacketReceived(ref Packet packet)
+        private bool OnMapInfoPacket(ref MapInfoPacket packet)
         {
-            switch (packet.ID)
+            this.map.Init(packet.Width, packet.Height, packet.Name);
+            return true;
+        }
+
+        private bool OnUpdatePacket(ref UpdatePacket packet)
+        {
+            foreach (var t in packet.Tiles)
+                this.map.Tiles[t.X][t.Y] = t.Tile;
+
+            foreach (var tileDef in packet.NewObjects)
             {
-                case PacketID.HELLO:
-                    this.map = new JsonMap(Singleton<XmlData>.Instance);
-                    break;
+                var def = tileDef;
+                var objectClass = Singleton<XmlData>.Instance.ObjectTypeToElement[def.ObjectType].Element("Class").Value;
+                if (objectClass == "Player") continue;
+            
+                if (objectClass != "Enemy" && objectClass != "Character")
+                {
+                    def.Stats.Position.X -= 0.5F;
+                    def.Stats.Position.Y -= 0.5F;
+                }
+            
+                int _x = (int)def.Stats.Position.X;
+                int _y = (int)def.Stats.Position.Y;
+                Array.Resize(ref map.Entities[_x][_y], map.Entities[_x][_y].Length + 1);
+                ObjectDef[] arr = map.Entities[_x][_y];
+            
+                arr[arr.Length - 1] = def;
             }
-            return base.OnClientPacketReceived(ref packet);
+            return true;
+        }
+
+        private bool OnHelloPacket(ref HelloPacket packet)
+        {
+            this.map = new JsonMap(Singleton<XmlData>.Instance);
+            return true;
         }
 
         public IEnumerable<string> RegisterCommands()

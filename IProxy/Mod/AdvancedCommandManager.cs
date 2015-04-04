@@ -21,35 +21,44 @@
 //SOFTWARE.
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace IProxy.Mod
 {
-    public class AssemblyRequestExtentionBase : ProxyExtentionBase
+    public abstract class AdvancedCommandManager : ICommandManager
     {
-        public virtual IEnumerable<Assembly> GetDependencyAssemblies()
+        public delegate bool Command(string[] args);
+
+        private Dictionary<string, Command> m_commands;
+
+        public AdvancedCommandManager()
         {
-            return Enumerable.Empty<Assembly>();
+            m_commands = new Dictionary<string, Command>();
+            HookCommands();
         }
 
-        /**
-        * Always returns true.
-        */
-        public override sealed bool DisposeAfterDisconnect()
+        public void ApplyCommandHook(string command, Command callback)
         {
-            return false;
+            if (command.IndexOf(" ") > -1) throw new ArgumentException("Whitespaces are not allowed in commands", "command", null);
+            string commandString = command.StartsWith("/") ? command.Remove(0, 1) : command;
+            if(m_commands.ContainsKey(commandString)) throw new InvalidOperationException("Command already bound to a callback");
+            m_commands.Add(commandString, callback);
         }
 
-        public Assembly LoadAssemblyFromStream(Stream assemblyStream)
+        public IEnumerable<string> RegisterCommands()
         {
-            if (assemblyStream == null) throw new InvalidOperationException("assemblyStream cannot be null.");
-            byte[] assemblyData = new byte[assemblyStream.Length];
-            assemblyStream.Read(assemblyData, 0, assemblyData.Length);
-            return Assembly.Load(assemblyData);
+            return m_commands.Select(_ => _.Key);
         }
+
+        public bool OnCommandGet(string command, string[] args)
+        {
+            if (m_commands.ContainsKey(command))
+                return m_commands[command](args);
+            return true;
+        }
+
+        public abstract void HookCommands();
     }
 }

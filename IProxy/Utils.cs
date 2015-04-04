@@ -19,6 +19,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+using IProxy;
 using IProxy.Networking;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,29 @@ public static class Utils
     public static string TextToLanguageString(string text)
     {
         return "{\"key\":\"blank\",\"tokens\":{\"data\":\"" + text + "\"}}";
+    }
+
+    public static ARGB HpToColor(int hp, int maxHp)
+    {
+        return PercentToColor((float)hp / (float)maxHp);
+    }
+
+    public static ARGB PercentToColor(float percent)
+    {
+        if (percent < 0 || percent > 1) throw new ArgumentException("Value must be between 0.0 and 1.0", "percent", null);
+
+        byte r, g;
+        if (percent < 0.5)
+        {
+            r = 255;
+            g = (byte)(255 * percent / 0.5);
+        }
+        else
+        {
+            g = 255;
+            r = (byte)(255 - (byte)(255 * (percent - 0.5) / 0.5));
+        }
+        return new ARGB(0, r, g, 0);
     }
 
     public static string To4Hex(short x)

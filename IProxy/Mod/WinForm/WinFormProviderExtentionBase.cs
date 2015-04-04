@@ -38,6 +38,7 @@ namespace IProxy.Mod.WinForm
 
         private ManualResetEvent threadPause = new ManualResetEvent(true); 
 
+        //Using thread instead of task here, because forms should always run on a thread.
         public Thread FormThread { get; private set; }
         public Form CurrentForm { get; private set; }
         private Type toOpenForm { get; set; }
@@ -54,7 +55,7 @@ namespace IProxy.Mod.WinForm
 
         public void SetNextForm(Type form)
         {
-            if (!registeredForms.Contains(form)) throw new InvalidOperationException("Form is not registered? Maybe a subform?");
+            if (!registeredForms.Contains(form)) throw new InvalidOperationException("Form is not registered. Maybe a subform?");
             if(CurrentForm != null && (form == CurrentForm.GetType())) return;
             toOpenForm = form;
             ResumeThread();

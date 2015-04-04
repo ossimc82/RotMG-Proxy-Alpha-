@@ -172,7 +172,7 @@ namespace Proxy
                         if (this.OnServerPacketReceive(ref pkt))
                             SendToClient(pkt);
                         else
-                            log.InfoFormat("Skip sending packet, abort by user:\n{0}", pkt.ToString());
+                            log.InfoFormat("Skip sending packet, abort by user: {0}", pkt.ID);
 
                     }
                     else

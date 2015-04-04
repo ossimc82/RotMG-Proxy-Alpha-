@@ -88,9 +88,7 @@ namespace Proxy
             }
 
             if ((Settings = CreateModInstance<ISettingsProvider>()) != null)
-            {
                 Settings.Register(System.Runtime.InteropServices.Marshal.GenerateGuidForType(Settings.GetType()).ToString());
-            }
         }
 
         public void Disconnect()

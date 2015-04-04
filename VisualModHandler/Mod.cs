@@ -72,22 +72,17 @@ namespace VisualModHandler
         }
     }
 
-    public class CommandManager : ICommandManager
+    public class CommandManager : AdvancedCommandManager
     {
-        public IEnumerable<string> RegisterCommands()
+        public override void HookCommands()
         {
-            yield return "visual";
+            ApplyCommandHook("visual", OnVisualCommand);
         }
 
-        public bool OnCommandGet(string command, string[] args)
+        private bool OnVisualCommand(string[] args)
         {
-            switch (command)
-            {
-                case "visual":
-                    Singleton<FormHost>.Instance.SetNextForm(typeof(MainForm));
-                    return false;
-            }
-            return true;
+            Singleton<FormHost>.Instance.SetNextForm(typeof(MainForm));
+            return false;
         }
     }
 

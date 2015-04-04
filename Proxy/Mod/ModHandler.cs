@@ -88,8 +88,7 @@ namespace Proxy
             {
                 try
                 {
-                    bool result = mod.PacketHandlerExtentionBase.OnServerPacketReceived(ref packet);
-                    if (!result && ret) ret = false;
+                    if (!mod.PacketHandlerExtentionBase.OnServerPacketReceived(ref packet) && ret) ret = false;
                 }
                 catch (Exception ex)
                 {
@@ -112,7 +111,7 @@ namespace Proxy
                     if (m_registeredCommands.ContainsKey(commandString.Split(' ')[0]))
                     {
                         string command = commandString.Split(' ')[0];
-                        string[] args = commandString.Replace(command, String.Empty).Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] args = commandString.Replace(command, String.Empty).Split(new string[1] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
                         if (!m_registeredCommands[command].CommandManager.OnCommandGet(command, args)) return false;
                     }
@@ -123,8 +122,7 @@ namespace Proxy
             {
                 try
                 {
-                    bool result = mod.PacketHandlerExtentionBase.OnClientPacketReceived(ref packet);
-                    if (!result && ret) ret = false;
+                    if (!mod.PacketHandlerExtentionBase.OnClientPacketReceived(ref packet) && ret) ret = false;
                 }
                 catch (Exception ex)
                 {

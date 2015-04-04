@@ -72,33 +72,33 @@ namespace RealmManager
         }
     }
 
-    public class PacketHandler : PacketHandlerExtentionBase
+    public class PacketHandler : AdvancedPacketHandlerExtentionBase
     {
         private int myObjectId;
 
-        public override bool OnServerPacketReceived(ref Packet packet)
+        protected override void HookPackets()
         {
-            switch (packet.ID)
-            {
-                case PacketID.MAPINFO:
-                    Singleton<World>.Instance.UpdateWorld(Utils.ChangePacketType<MapInfoPacket>(packet));
-                    break;
-                case PacketID.CREATE_SUCCESS:
-                    myObjectId = Utils.ChangePacketType<Create_SuccessPacket>(packet).ObjectID;
-                    break;
-                case PacketID.UPDATE:
-                    parseUpdate(Utils.ChangePacketType<UpdatePacket>(packet));
-                    break;
-                case PacketID.NEW_TICK:
-                    parseNewTick(Utils.ChangePacketType<NewTickPacket>(packet));
-                    break;
-            }
-            return base.OnClientPacketReceived(ref packet);
+            ApplyPacketHook<MapInfoPacket>(OnMapInfoPacket);
+            ApplyPacketHook<CreateSuccessPacket>(OnCreateSuccessPacket);
+            ApplyPacketHook<UpdatePacket>(OnUpdatePacket);
+            ApplyPacketHook<NewTickPacket>(OnNewTickPacket);
         }
 
-        private void parseNewTick(NewTickPacket newTickPacket)
+        private bool OnMapInfoPacket(ref MapInfoPacket packet)
         {
-            foreach (var i in newTickPacket.UpdateStatuses)
+            Singleton<World>.Instance.UpdateWorld(packet);
+            return true;
+        }
+
+        private bool OnCreateSuccessPacket(ref CreateSuccessPacket packet)
+        {
+            myObjectId = packet.ObjectID;
+            return true;
+        }
+
+        private bool OnNewTickPacket(ref NewTickPacket packet)
+        {
+            foreach (var i in packet.UpdateStatuses)
             {
                 Entity en = Singleton<World>.Instance.GetEntity(i.Id);
                 if (en != null)
@@ -107,11 +107,12 @@ namespace RealmManager
                 if (i.Id == myObjectId)
                     Singleton<Player>.Instance.ImportStats(i);
             }
+            return true;
         }
 
-        private void parseUpdate(UpdatePacket updatePacket)
+        private bool OnUpdatePacket(ref UpdatePacket packet)
         {
-            foreach (var i in updatePacket.NewObjects)
+            foreach (var i in packet.NewObjects)
             {
                 Entity en = Singleton<World>.Instance.GetEntity(i.Stats.Id, i.ObjectType);
                 en.ImportStats(i.Stats);
@@ -123,6 +124,7 @@ namespace RealmManager
                     Singleton<Player>.Instance.ImportStats(i.Stats);
                 }
             }
+            return true;
         }
     }
 }

@@ -68,7 +68,7 @@ namespace Proxy
                     Singleton<Network>.Instance.After(1200, new Action(() => SendToClient(new NotificationPacket
                     {
                         Color = new ARGB(0x00ff00),
-                        ObjectId = Utils.ChangePacketType<Create_SuccessPacket>(pkt).ObjectID,
+                        ObjectId = Utils.ChangePacketType<CreateSuccessPacket>(pkt).ObjectID,
                         Text = Utils.TextToLanguageString("Proxy Enabled.")
                     })));
                     break;

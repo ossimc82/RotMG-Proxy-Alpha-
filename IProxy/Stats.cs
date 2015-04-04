@@ -344,6 +344,14 @@ namespace IProxy
             B = (byte)((argb & 0x000000ff) >> 0);
         }
 
+        public ARGB(byte a, byte r, byte g, byte b)
+        {
+            A = a;
+            R = r;
+            G = g;
+            B = b;
+        }
+
         public static ARGB Read(DReader rdr)
         {
             ARGB ret = new ARGB();
