@@ -243,7 +243,7 @@ namespace Proxy
 
             object System.Collections.IEnumerator.Current
             {
-                get { return this.m_items[this.m_index]; }
+                get { return Current; }
             }
 
             public bool MoveNext()

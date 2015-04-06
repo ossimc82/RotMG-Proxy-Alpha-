@@ -52,8 +52,7 @@ namespace VisualModHandler
 
             foreach (var setting in settingsProvider.GetValues())
             {
-                Controls.Add(new SettingsControl());
-                (Controls[Controls.Count - 1] as SettingsControl).SetSetting(setting.Key, setting.Value);
+                Controls.Add(new SettingsControl(setting.Key, setting.Value));
                 Controls[Controls.Count - 1].Location = new Point(12, nextHeight);
                 nextHeight += 30;
             }
@@ -80,43 +79,47 @@ namespace VisualModHandler
     class SettingsControl : Control
     {
         private TextBox key;
-        private TextBox value;
+        private TextBox textValue;
+        private CheckBox boolValue;
         private Label equalsSign;
 
-        public SettingsControl()
+        public SettingsControl(string key, string value = null)
         {
             this.key = new TextBox();
-            this.value = new TextBox();
             this.equalsSign = new Label();
-
             this.Size = new System.Drawing.Size(450, 20);
-
             this.key.Size = new Size(200, 30);
             this.equalsSign.AutoSize = true;
             this.equalsSign.Size = new Size(10, 20);
-
             this.key.Width = 200;
-            this.value.Width = 200;
-
             this.key.Location = new Point(0, 0);
-            this.value.Location = new Point(230, 0);
             this.equalsSign.Location = new Point(210, 0);
-
             this.equalsSign.Text = "=";
             this.key.ReadOnly = true;
 
             Controls.Add(this.equalsSign);
             Controls.Add(this.key);
-            Controls.Add(this.value);
+
+            if (value.ToLower() == "true" || value.ToLower() == "false")
+            {
+                this.boolValue = new CheckBox();
+                this.boolValue.Width = 200;
+                this.boolValue.Location = new Point(230, 0);
+                this.boolValue.Checked = value.ToLower() == "true";
+                Controls.Add(this.boolValue);
+            }
+            else
+            {
+                this.textValue = new TextBox();
+                this.textValue.Width = 200;
+                this.textValue.Location = new Point(230, 0);
+                this.textValue.Text = value;
+                Controls.Add(this.textValue);
+            }
+            this.key.Text = key;
         }
 
         public string Key { get { return this.key.Text; } }
-        public string Value { get { return this.value.Text; } }
-
-        public void SetSetting(string key, string value = null)
-        {
-            this.key.Text = key;
-            this.value.Text = value;
-        }
+        public string Value { get { return this.textValue == null ? this.boolValue.Checked.ToString() : this.textValue.Text; } }
     }
 }

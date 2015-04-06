@@ -120,10 +120,19 @@ namespace Proxy
                         Packet pkt = Packet.Packets[(PacketID)id].CreateInstance();
                         pkt.Read(content, len - PACKET_HEADER_SIZE);
 
-                        if (this.OnClientPacketReceive(ref pkt))
-                            SendToServer(pkt);
+                        if (pkt.ID == PacketID.HELLO)
+                        {
+                            log.Info("Hello from client.");
+                            this.OnClientPacketReceive(ref pkt);
+                            m_sendToServer(new RawPacket { id = id, content = content });
+                        }
                         else
-                            log.InfoFormat("Skip sending packet, abort by user:\n{0}", pkt.ToString());
+                        {
+                            if (this.OnClientPacketReceive(ref pkt))
+                                SendToServer(pkt);
+                            else
+                                log.InfoFormat("Skip sending packet, abort by user:\n{0}", pkt.ToString());
+                        }
                     }
                     else
                         m_sendToServer(new RawPacket { id = id, content = content });

@@ -78,14 +78,16 @@ namespace IProxy.DataSerializing
 
         public void WriteUTF(string str)
         {
-            Write((short)str.Length);
-            Write(Encoding.UTF8.GetBytes(str));
+            var data = Encoding.UTF8.GetBytes(str);
+            Write((short)data.Length);
+            base.Write(data);
         }
 
         public void Write32UTF(string str)
         {
-            Write((int)str.Length);
-            Write(Encoding.UTF8.GetBytes(str));
+            var data = Encoding.UTF8.GetBytes(str);
+            Write((int)data.Length);
+            base.Write(data);
         }
     }
 }

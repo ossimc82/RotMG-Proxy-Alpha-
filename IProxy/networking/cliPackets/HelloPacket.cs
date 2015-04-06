@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 using IProxy.DataSerializing;
+using System;
 namespace IProxy.Networking.ClientPackets
 {
     public class HelloPacket : ClientPacket
@@ -71,23 +72,7 @@ namespace IProxy.Networking.ClientPackets
 
         protected override void Write(DWriter wtr)
         {
-            wtr.WriteUTF(BuildVersion);
-            wtr.Write(GameId);
-            wtr.WriteUTF(GUID);
-            wtr.Write(RandomInt1);
-            wtr.WriteUTF(Password);
-            wtr.Write(RandomInt2);
-            wtr.WriteUTF(Secret);
-            wtr.Write(KeyTime);
-            wtr.Write((short)Key.Length);
-            wtr.Write(Key);
-            wtr.Write(MapInfo.Length);
-            wtr.Write(MapInfo);
-            wtr.WriteUTF(obf1);
-            wtr.WriteUTF(obf2);
-            wtr.WriteUTF(obf3);
-            wtr.WriteUTF(obf4);
-            wtr.WriteUTF(obf5);
+            throw new InvalidOperationException("The hello packet is readonly and cannot be written.");
         }
     }
 }

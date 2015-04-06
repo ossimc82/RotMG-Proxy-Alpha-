@@ -258,12 +258,9 @@ The `IProxy.Mod::AdvancedPacketHandlerExtentionBase` class is a more advanced pa
 > ###Syntax
 > `public abstract class AdvancedPacketHandlerExtentionBase : PacketHandlerExtentionBase`
 
-- `public delegate bool PacketReceive<T>(ref T packet) where T : Packet;` The delegate for a defined packet.
-- `public delegate bool GeneralPacketReceive<T>(ref Packet packet) where T : Packet;` The delegate for general packets.
-
+- `delegate bool PacketReceive<T>(ref T packet) where T : Packet;` The delegate for a defined packet.
+- `delegate bool GeneralPacketReceive<T>(ref Packet packet) where T : Packet;` The delegate for general packets.
 - `abstract void HookPackets()` This method will be called to hook your packets.
-
-
 - `void ApplyPacketHook<T>(PacketReceive<T> callback) where T : Packet` This will hook a packet type to the defined callback. T is PacketType
 - `void ApplyGeneralPacketHook<T>(GeneralPacketReceive<T> callback) where T : Packet` This will hook a packet type to a general callback. T is PacketType
 
@@ -343,8 +340,8 @@ The `IProxy.Mod::AdvancedCommandManager` class is a more advanced command handle
 > ###Syntax
 > `public abstract class AdvancedCommandManager : ICommandManager`
 
-- `public delegate bool Command(string[] args)` The command callback delegate.
-- `protected abstract void HookCommands();` This method will be called to hook your commands to a callback.
+- `delegate bool Command(string[] args)` The command callback delegate.
+- `abstract void HookCommands();` This method will be called to hook your commands to a callback.
 - `void ApplyCommandHook(string command, Command callback)` Applies a callback to the specified command.
 - *Members implemented by ICommandManager will be handled by the class itself*
 
@@ -374,10 +371,10 @@ The `IProxy::Server` class is used by the proxy to connect to the target server
 > ###Syntax
 > `public class Server`
 
-- `public string DefaultHost { get; set; }` Gets or sets the Default Server IP
-- `public string CurrentHost { get; set; }` Gets or sets the Current Server IP
-- `public int DefaultPort { get; set; }` Gets or sets the Default Server Port
-- `public int CurrentPort { get; set; }` Gets or sets the Current Server Port
+- `string DefaultHost { get; set; }` Gets or sets the Default Server IP
+- `string CurrentHost { get; set; }` Gets or sets the Current Server IP
+- `int DefaultPort { get; set; }` Gets or sets the Default Server Port
+- `int CurrentPort { get; set; }` Gets or sets the Current Server Port
 
 > ###Usage
 > ```C#
@@ -488,5 +485,30 @@ Values of the enum:
 		TINKERQUEST = 62, //slotid: 88
 		QUESTFETCHRESPONSE = 90, //slotid: 89
 		QUESTREDEEMRESPONSE = 89 //slotid: 90
+
+## `IProxy.Mod::AssemblyRequestExtentionBase` Class
+----------------------------------------
+The `IProxy.Mod::AssemblyRequestExtentionBase` class tells the proxy that your mod is using external assemblies.
+
+> ###Syntax
+> `public abstract class AssemblyRequestExtentionBase : ProxyExtentionBase`
+
+- `abstract IEnumerable<Assembly> GetDependencyAssemblies()` Returns the assemblies that your mod will use.
+- `Assembly LoadAssemblyFromStream(Stream assemblyStream)` Returns an assembly loaded in runtime.
+
+**Note: You need to embed the .dll file into your project and you need to specify the full name of the assembly.
+For more information on how to use the `GetManifestResourceStream` method, please visit: http://stackoverflow.com/questions/3314140/how-to-read-embedded-resource-text-file**
+
+> ###Usage
+> ```C#
+> public class AssemblyLoader : AssemblyRequestExtentionBase
+> {
+>     public override IEnumerable<Assembly> GetDependencyAssemblies()
+>     {
+>         yield return LoadAssemblyFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("MyProjectNameSpace.MyAssemblyToLoad.dll"));
+>     }
+> }
+> ```
+
 
 ## To be continued...

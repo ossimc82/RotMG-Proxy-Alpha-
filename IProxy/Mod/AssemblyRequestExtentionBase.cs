@@ -29,12 +29,9 @@ using System.Threading.Tasks;
 
 namespace IProxy.Mod
 {
-    public class AssemblyRequestExtentionBase : ProxyExtentionBase
+    public abstract class AssemblyRequestExtentionBase : ProxyExtentionBase
     {
-        public virtual IEnumerable<Assembly> GetDependencyAssemblies()
-        {
-            return Enumerable.Empty<Assembly>();
-        }
+        public abstract IEnumerable<Assembly> GetDependencyAssemblies();
 
         /**
         * Always returns true.
