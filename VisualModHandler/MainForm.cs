@@ -22,6 +22,7 @@
 using IProxy;
 using IProxy.Mod;
 using IProxy.Mod.WinForm;
+using MetroFramework.Forms;
 using Proxy;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ using System.Windows.Forms;
 
 namespace VisualModHandler
 {
-    public partial class MainForm : Form
+    public partial class MainForm : MetroForm
     {
         private IProxyMod selectedMod;
         private Dictionary<string, IProxyMod> mods;
@@ -45,10 +46,10 @@ namespace VisualModHandler
             mods = new Dictionary<string, IProxyMod>();
             InitializeComponent();
             label1.Text = "Mods: " + Singleton<ModHandler>.Instance.ModCount;
-            listBox1.SelectionMode = SelectionMode.One;
+            listBox1.ListBox.SelectionMode = SelectionMode.One;
             foreach(var mod in Singleton<ModHandler>.Instance)
             {
-                listBox1.Items.Add(mod.Information.Name);
+                listBox1.ListBox.Items.Add(mod.Information.Name);
                 mods.Add(mod.Information.Name, mod.Information);
                 if (mod.Information.Name == Singleton<Mod>.Instance.Name) continue;
                 if (!mod.Enabled && Singleton<Settings>.Instance.GetValue<bool>("Enabled_" + mod.Information.Name.Replace(" ", String.Empty), "true"))
@@ -60,14 +61,15 @@ namespace VisualModHandler
             listBox1.SelectedIndexChanged += listBox1_SelectedIndexChanged;
             modToggleButton.Click += modToggleButton_Click;
             modSettingsButton.Click += modSettingsButton_Click;
-            listBox1.SelectedItem = listBox1.Items[0];
+            listBox1.ListBox.SelectedItem = listBox1.ListBox.Items[0];
         }
 
         private void modSettingsButton_Click(object sender, EventArgs e)
         {
             var settingsForm = new ModSettingsForm(Singleton<ModHandler>.Instance[selectedMod].Settings, selectedMod);
             settingsForm.StartPosition = FormStartPosition.CenterParent;
-            settingsForm.ShowDialog(this);
+            if (settingsForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                MetroFramework.MetroMessageBox.Show(this, "Settings saved", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void modToggleButton_Click(object sender, EventArgs e)
@@ -88,7 +90,7 @@ namespace VisualModHandler
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            selectItem((string)listBox1.SelectedItem);
+            selectItem((string)listBox1.ListBox.SelectedItem);
         }
 
         private void selectItem(string mod)

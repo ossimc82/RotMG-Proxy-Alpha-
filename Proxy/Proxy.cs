@@ -88,6 +88,7 @@ namespace Proxy
 
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
+            loadFormAssemblies();
             loadMods();
 
             m_svrSkt = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -97,6 +98,27 @@ namespace Proxy
             log.Info("Listening at port 2050...");
 
             Thread.CurrentThread.Join();
+        }
+
+        private static void loadFormAssemblies()
+        {
+            string[] assemblies = new string[3]
+            {
+                "Proxy.Libs.MetroFramework.Design.dll",
+                "Proxy.Libs.MetroFramework.Fonts.dll",
+                "Proxy.Libs.MetroFramework.dll"
+            };
+
+            foreach (var path in assemblies)
+            {
+                using (var assemblyStream = typeof(Proxy).Assembly.GetManifestResourceStream(path))
+                {
+                    byte[] assemblyData = new byte[assemblyStream.Length];
+                    assemblyStream.Read(assemblyData, 0, assemblyData.Length);
+                    var assembly = Assembly.Load(assemblyData);
+                    Singleton<ModHandler>.Instance.Assemblies.Add(assembly.FullName, assembly);
+                }
+            }
         }
 
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)

@@ -164,6 +164,7 @@ namespace Proxy
                     if (proxyVersion > modVersion)
                         log.WarnFormat("[{0}] Modloader version is higher than the required version. Some features may not work correctly.", userMod.Name);
                     m_mods.Add(userMod, new Mod(userMod, assembly));
+                    m_mods[userMod].LoadAssemblies(ref m_modDependencyAssemblies);
                     IEnumerable<string> commands = new string[0];
                     m_mods[userMod].Initialize(ref commands);
 

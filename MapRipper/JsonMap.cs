@@ -161,7 +161,9 @@ namespace MapRipper
                     }
             obj.data = ZlibStream.CompressBuffer(ms.ToArray());
             obj.dict = locs.ToArray();
-            return JsonConvert.SerializeObject(obj);
+            var settings = new JsonSerializerSettings();
+            settings.NullValueHandling = NullValueHandling.Ignore;
+            return JsonConvert.SerializeObject(obj, settings);
         }
     }
 }

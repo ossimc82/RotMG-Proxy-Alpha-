@@ -181,5 +181,18 @@ namespace Proxy
             if (target == null) return;
             target.Dispose();
         }
+
+        internal void LoadAssemblies(ref Dictionary<string, Assembly> assemblies)
+        {
+            if (AssemblyRequestExtentionBase != null)
+            {
+                foreach (var assembly in AssemblyRequestExtentionBase.GetDependencyAssemblies())
+                {
+                    if (assemblies.ContainsKey(assembly.FullName))
+                        continue;
+                    assemblies.Add(assembly.FullName, assembly);
+                }
+            }
+        }
     }
 }

@@ -30,6 +30,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MetroFramework">
+      <HintPath>..\..\K_Relay\MapRipper\Lib\MetroFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="MetroFramework.Design">
+      <HintPath>..\..\K_Relay\MapRipper\Lib\MetroFramework.Design.dll</HintPath>
+    </Reference>
+    <Reference Include="MetroFramework.Fonts">
+      <HintPath>..\..\K_Relay\MapRipper\Lib\MetroFramework.Fonts.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -46,6 +55,10 @@
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MetroDefaults.cs" />
+    <Compile Include="MetroListBox.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Mod.cs" />
     <Compile Include="ModSettingsForm.cs">
@@ -76,6 +89,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="VisualModHandler.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Libs\MetroFramework.Design.dll" />
+    <EmbeddedResource Include="Libs\MetroFramework.dll" />
+    <EmbeddedResource Include="Libs\MetroFramework.Fonts.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

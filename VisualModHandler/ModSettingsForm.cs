@@ -20,6 +20,8 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 using IProxy.Mod;
+using MetroFramework.Controls;
+using MetroFramework.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,11 +34,10 @@ using System.Windows.Forms;
 
 namespace VisualModHandler
 {
-    public partial class ModSettingsForm : Form
+    public partial class ModSettingsForm : MetroForm
     {
         private ISettingsProvider settingsProvider;
         private IProxyMod mod;
-        private Button saveButton;
 
         public ModSettingsForm(ISettingsProvider settingsProvider, IProxyMod mod)
         {
@@ -44,11 +45,9 @@ namespace VisualModHandler
             this.settingsProvider = settingsProvider;
             this.mod = mod;
 
-            SuspendLayout();
-
             Text = String.Format("{0} - Settings", mod.Name);
 
-            var nextHeight = 12;
+            var nextHeight = 60;
 
             foreach (var setting in settingsProvider.GetValues())
             {
@@ -56,16 +55,10 @@ namespace VisualModHandler
                 Controls[Controls.Count - 1].Location = new Point(12, nextHeight);
                 nextHeight += 30;
             }
+            this.saveButton.Location = new Point(376, nextHeight);
 
-            saveButton = new Button();
-            saveButton.Text = "Save";
-            saveButton.Click += saveButton_Click;
-            saveButton.Location = new Point(350, nextHeight);
-            saveButton.Size = new Size(100, 25);
-            Controls.Add(saveButton);
-
-            this.Size = new Size(474, nextHeight + 70);
-            ResumeLayout(false);
+            this.Size = new Size(474, nextHeight + 30);
+            this.DialogResult = System.Windows.Forms.DialogResult.No;
         }
 
         private void saveButton_Click(object sender, EventArgs e)
@@ -73,22 +66,25 @@ namespace VisualModHandler
             foreach (var s in Controls.Cast<Control>().OfType<SettingsControl>())
                 settingsProvider.SetValue(s.Key, s.Value);
             settingsProvider.Save();
+            DialogResult = System.Windows.Forms.DialogResult.OK;
+            Close();
         }
     }
 
     class SettingsControl : Control
     {
-        private TextBox key;
-        private TextBox textValue;
-        private CheckBox boolValue;
-        private Label equalsSign;
+        private MetroTextBox key;
+        private MetroTextBox textValue;
+        private MetroToggle boolValue;
+        private MetroLabel equalsSign;
 
         public SettingsControl(string key, string value = null)
         {
-            this.key = new TextBox();
-            this.equalsSign = new Label();
-            this.Size = new System.Drawing.Size(450, 20);
-            this.key.Size = new Size(200, 30);
+            this.key = new MetroTextBox();
+            this.key.UseStyleColors = true;
+            this.equalsSign = new MetroLabel();
+            this.Size = new System.Drawing.Size(450, 25);
+            this.key.Width = 200;
             this.equalsSign.AutoSize = true;
             this.equalsSign.Size = new Size(10, 20);
             this.key.Width = 200;
@@ -102,15 +98,17 @@ namespace VisualModHandler
 
             if (value.ToLower() == "true" || value.ToLower() == "false")
             {
-                this.boolValue = new CheckBox();
-                this.boolValue.Width = 200;
+                this.boolValue = new MetroToggle();
+                this.boolValue.UseStyleColors = true;
+                this.boolValue.Width = 100;
+                this.boolValue.Height = 20;
                 this.boolValue.Location = new Point(230, 0);
                 this.boolValue.Checked = value.ToLower() == "true";
                 Controls.Add(this.boolValue);
             }
             else
             {
-                this.textValue = new TextBox();
+                this.textValue = new MetroTextBox();
                 this.textValue.Width = 200;
                 this.textValue.Location = new Point(230, 0);
                 this.textValue.Text = value;
