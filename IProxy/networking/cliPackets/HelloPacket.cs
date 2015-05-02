@@ -72,7 +72,23 @@ namespace IProxy.Networking.ClientPackets
 
         protected override void Write(DWriter wtr)
         {
-            throw new InvalidOperationException("The hello packet is readonly and cannot be written.");
+            wtr.WriteUTF(BuildVersion);
+            wtr.Write(GameId);
+            wtr.WriteUTF(GUID);
+            wtr.Write(RandomInt1); //random int
+            wtr.WriteUTF(Password);
+            wtr.Write(RandomInt2); //random int
+            wtr.WriteUTF(Secret);
+            wtr.Write(KeyTime);
+            wtr.Write((short)Key.Length);
+            wtr.Write(Key);
+            wtr.Write(MapInfo.Length);
+            wtr.Write(MapInfo);
+            wtr.WriteUTF(obf1);
+            wtr.WriteUTF(obf2);
+            wtr.WriteUTF(obf3);
+            wtr.WriteUTF(obf4);
+            wtr.WriteUTF(obf5);
         }
     }
 }

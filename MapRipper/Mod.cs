@@ -73,7 +73,7 @@ namespace MapRipper
         }
     }
 
-    public class MapRipper : AdvancedPacketHandlerExtentionBase, ICommandManager
+    public class MapRipper : AdvancedPacketHandlerWithAdvancedCommandManagerExtentionBase
     {
         private JsonMap map;
 
@@ -82,6 +82,11 @@ namespace MapRipper
             ApplyPacketHook<MapInfoPacket>(OnMapInfoPacket);
             ApplyPacketHook<UpdatePacket>(OnUpdatePacket);
             ApplyPacketHook<HelloPacket>(OnHelloPacket);
+        }
+
+        protected override void HookCommands()
+        {
+            ApplyCommandHook("saveMap", OnSaveMap);
         }
 
         private bool OnMapInfoPacket(ref MapInfoPacket packet)
@@ -128,30 +133,25 @@ namespace MapRipper
             yield return "saveMap";
         }
 
-        public bool OnCommandGet(string command, string[] args)
+        public bool OnSaveMap(string[] args)
         {
-            switch(command)
+            Singleton<Network>.Instance.SendToClient(new TextPacket
             {
-                case "saveMap":
-                    Singleton<Network>.Instance.SendToClient(new TextPacket
-                    {
-                        BubbleTime = 5,
-                        CleanText = "",
-                        Name = "",
-                        ObjectId = -1,
-                        Recipient = "",
-                        Stars = -1,
-                        Text = "Saving map..."
-                    });
-                    Singleton<Network>.Instance.SendToClient(new FilePacket
-                    {
-                        Name = args.Length == 1 ? args[0] + ".jm" : "map_" + this.map.Name + ".jm",
-                        Bytes = Encoding.UTF8.GetBytes(this.map.ToJson())
-                    });
-                    return false;
-            }
-            return true;
-        }
+                BubbleTime = 5,
+                CleanText = "",
+                Name = "",
+                ObjectId = -1,
+                Recipient = "",
+                Stars = -1,
+                Text = "Saving map..."
+            });
+            Singleton<Network>.Instance.SendToClient(new FilePacket
+            {
+                Name = args.Length == 1 ? args[0] + ".jm" : "map_" + this.map.Name + ".jm",
+                Bytes = Encoding.UTF8.GetBytes(this.map.ToJson())
+            });
+            return false;
+        }        
     }
 
     public class AssemblyLoader : AssemblyRequestExtentionBase

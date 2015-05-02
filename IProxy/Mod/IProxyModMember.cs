@@ -19,40 +19,21 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-using IProxy.DataSerializing;
-namespace IProxy.Networking.ClientPackets
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace IProxy.Mod
 {
-    public class EditAccountListPacket : ClientPacket
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple=false)]
+    public class IProxyModMemberAttribute : Attribute
     {
-        public const int LOCKED_LIST = 0;
-        public const int IGNORED_LIST = 1;
+        public Type TargetType { get; private set; }
 
-        public int AccountListId { get; set; }
-        public bool Add { get; set; }
-        public int ObjectId { get; set; }
-
-        public override PacketID ID
+        public IProxyModMemberAttribute(Type type)
         {
-            get { return PacketID.EDITACCOUNTLIST; }
-        }
-
-        public override Packet CreateInstance()
-        {
-            return new EditAccountListPacket();
-        }
-
-        protected override void Read(DReader rdr)
-        {
-            AccountListId = rdr.ReadInt32();
-            Add = rdr.ReadBoolean();
-            ObjectId = rdr.ReadInt32();
-        }
-
-        protected override void Write(DWriter wtr)
-        {
-            wtr.Write(AccountListId);
-            wtr.Write(Add);
-            wtr.Write(ObjectId);
+            this.TargetType = type;
         }
     }
 }

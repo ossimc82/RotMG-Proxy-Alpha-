@@ -35,8 +35,6 @@ using IProxy.DataSerializing;
 
 namespace IProxy.Networking
 {
-    using NReader = IProxy.DataSerializing.DReader;
-
     public abstract class Packet
     {
         public static Dictionary<PacketID, Packet> Packets = new Dictionary<PacketID, Packet>();
@@ -77,7 +75,7 @@ namespace IProxy.Networking
 
         public void Read(byte[] body, int len)
         {
-            DReader rdr = new NReader(new MemoryStream(body, 0, len));
+            DReader rdr = new DReader(new MemoryStream(body, 0, len));
             Read(rdr);
         }
 
@@ -89,7 +87,7 @@ namespace IProxy.Networking
             return (int)wtr.BaseStream.Length;
         }
 
-        protected abstract void Read(NReader rdr);
+        protected abstract void Read(DReader rdr);
         protected abstract void Write(DWriter wtr);
 
         public override string ToString()
@@ -119,7 +117,7 @@ namespace IProxy.Networking
     {
         public override PacketID ID { get { return (PacketID)255; } }
         public override Packet CreateInstance() { return new NopPacket(); }
-        protected override void Read(NReader rdr) { }
+        protected override void Read(DReader rdr) { }
         protected override void Write(DWriter wtr) { }
     }
 }

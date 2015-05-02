@@ -47,6 +47,7 @@ namespace Proxy
 
         private object clientSend;
         private object serverSend;
+        private bool m_disconnected;
 
         internal RC4 ClientReceiveKey { get; private set; }
         internal RC4 ClientSendKey { get; private set; }
@@ -120,19 +121,19 @@ namespace Proxy
                         Packet pkt = Packet.Packets[(PacketID)id].CreateInstance();
                         pkt.Read(content, len - PACKET_HEADER_SIZE);
 
-                        if (pkt.ID == PacketID.HELLO)
-                        {
-                            log.Info("Hello from client.");
-                            this.OnClientPacketReceive(ref pkt);
-                            m_sendToServer(new RawPacket { id = id, content = content });
-                        }
-                        else
-                        {
+                        //if (pkt.ID == PacketID.HELLO)
+                        //{
+                        //    log.Info("Hello from client.");
+                        //    this.OnClientPacketReceive(ref pkt);
+                        //    m_sendToServer(new RawPacket { id = id, content = content });
+                        //}
+                        //else
+                        //{
                             if (this.OnClientPacketReceive(ref pkt))
                                 SendToServer(pkt);
                             else
                                 log.InfoFormat("Skip sending packet, abort by user:\n{0}", pkt.ToString());
-                        }
+                        //}
                     }
                     else
                         m_sendToServer(new RawPacket { id = id, content = content });
@@ -201,15 +202,15 @@ namespace Proxy
 
         public void Disconnect()
         {
-            if (clientSocket != null && clientSocket.IsBound)
-                clientSocket.Close();
-            if (dest != null && dest.Client.IsBound)
-                dest.Close();
-
-            if (wkr.ThreadState != ThreadState.Running)
-                wkr.Abort();
-
-            Singleton<ModHandler>.Instance.Disconnect();
+            if (!m_disconnected)
+            {
+                if (dest != null && dest.Client.IsBound)
+                    dest.Close();
+                if (wkr.ThreadState != ThreadState.Running)
+                    wkr.Abort();
+                Singleton<ModHandler>.Instance.Disconnect();
+                m_disconnected = true;
+            }
         }
 
         public void SendToClient(Packet pkt)

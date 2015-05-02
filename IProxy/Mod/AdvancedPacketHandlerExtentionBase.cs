@@ -34,41 +34,41 @@ namespace IProxy.Mod
         public delegate bool PacketReceive<T>(ref T packet) where T : Packet;
         public delegate bool GeneralPacketReceive<T>(ref Packet packet) where T : Packet;
 
-        private Dictionary<Type, MethodInfo> m_hooks;
+        private Dictionary<Type, Delegate> m_hooks;
 
         public AdvancedPacketHandlerExtentionBase()
         {
-            m_hooks = new Dictionary<Type, MethodInfo>();
+            m_hooks = new Dictionary<Type, Delegate>();
             HookPackets();
         }
 
         protected abstract void HookPackets();
 
-        protected void ApplyPacketHook<T>(PacketReceive<T> callback) where T : Packet
+        public void ApplyPacketHook<T>(PacketReceive<T> callback) where T : Packet
         {
             if (m_hooks.ContainsKey(typeof(T))) throw new InvalidOperationException("Packet already bound to a callback");
-            m_hooks.Add(typeof(T), callback.Method);
+            m_hooks.Add(typeof(T), callback);
         }
 
-        protected void ApplyGeneralPacketHook<T>(GeneralPacketReceive<T> callback) where T : Packet
+        public void ApplyGeneralPacketHook<T>(GeneralPacketReceive<T> callback) where T : Packet
         {
             if (m_hooks.ContainsKey(typeof(T))) throw new InvalidOperationException("Packet already bound to a callback");
-            m_hooks.Add(typeof(T), callback.Method);
+            m_hooks.Add(typeof(T), callback);
         }
 
         public sealed override bool OnServerPacketReceived(ref Packet packet)
         {
-            MethodInfo target;
+            Delegate target;
             if (m_hooks.TryGetValue(packet.GetType(), out target))
-                return (bool)target.Invoke(this, new object[] { packet });
+                return (bool)target.Method.Invoke(target.Target, new object[] { packet });
             return base.OnServerPacketReceived(ref packet);
         }
 
         public sealed override bool OnClientPacketReceived(ref Packet packet)
         {
-            MethodInfo target;
+            Delegate target;
             if (m_hooks.TryGetValue(packet.GetType(), out target))
-                return (bool)target.Invoke(this, new object[] { packet });
+                return (bool)target.Method.Invoke(target.Target ?? this, new object[] { packet });
             return base.OnClientPacketReceived(ref packet);
         }
     }

@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mod\AdvancedCommandManager.cs" />
+    <Compile Include="Mod\AdvancedPacketHandlerWithAdvancedCommandManagerExtentionBase.cs" />
     <Compile Include="Mod\AdvancedPacketHandlerExtentionBase.cs" />
     <Compile Include="Mod\AssemblyRequestExtentionBase.cs" />
     <Compile Include="common\data\Descriptors.cs" />
@@ -53,7 +54,9 @@
     <Compile Include="common\SimpleSettings.cs" />
     <Compile Include="common\WeakDictionary.cs" />
     <Compile Include="Mod\ICommandManager.cs" />
+    <Compile Include="Mod\IProxyInject.cs" />
     <Compile Include="Mod\IProxyMod.cs" />
+    <Compile Include="Mod\IProxyModMember.cs" />
     <Compile Include="Mod\ISettingsProvider.cs" />
     <Compile Include="Mod\WinForm\WinFormProviderExtentionBase.cs" />
     <Compile Include="Networking\cliPackets\AcceptTradePacket.cs" />

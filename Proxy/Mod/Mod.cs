@@ -52,8 +52,11 @@ namespace Proxy
         private IWinFormHost winFormHost;
         private Assembly assembly;
 
+        private List<object> m_customInjects;
+
         public Mod(IProxyMod userMod, Assembly assembly)
         {
+            this.m_customInjects = new List<object>();
             this.userMod = userMod;
             this.assembly = assembly;
             Enabled = true;
@@ -70,24 +73,25 @@ namespace Proxy
 
         internal void Initialize(ref IEnumerable<string> commands)
         {
-            PacketHandlerExtentionBase = CreateModInstance<PacketHandlerExtentionBase>();
-            AssemblyRequestExtentionBase = CreateModInstance<AssemblyRequestExtentionBase>();
-            WinFormProviderExtentionBase = CreateModInstance<WinFormProviderExtentionBase>();
+            CreateCustomInjections();
+            PacketHandlerExtentionBase = GetMemberOrCreateModInstance<PacketHandlerExtentionBase>();
+            AssemblyRequestExtentionBase = GetMemberOrCreateModInstance<AssemblyRequestExtentionBase>();
+            WinFormProviderExtentionBase = GetMemberOrCreateModInstance<WinFormProviderExtentionBase>();
 
             if (PacketHandlerExtentionBase is ICommandManager)
                 CommandManager = (PacketHandlerExtentionBase as ICommandManager);
-            else CommandManager = CreateModInstance<ICommandManager>();
+            else CommandManager = GetMemberOrCreateModInstance<ICommandManager>();
 
             if (CommandManager != null) commands = CommandManager.RegisterCommands();
 
-            if ((winFormHost = CreateModInstance<IWinFormHost>()) != null && WinFormProviderExtentionBase != null && winFormHost.RunOnLoad())
+            if ((winFormHost = GetMemberOrCreateModInstance<IWinFormHost>()) != null && WinFormProviderExtentionBase != null && winFormHost.RunOnLoad())
             {
                 WinFormProviderExtentionBase.CreateSingletonForProvider();
                 WinFormProviderExtentionBase.SetNextForm(winFormHost.GetDefaultForm());
                 WinFormProviderExtentionBase.FormThread.Start();
             }
 
-            if ((Settings = CreateModInstance<ISettingsProvider>()) != null)
+            if ((Settings = GetMemberOrCreateModInstance<ISettingsProvider>()) != null)
                 Settings.Register(System.Runtime.InteropServices.Marshal.GenerateGuidForType(Settings.GetType()).ToString());
         }
 
@@ -105,20 +109,54 @@ namespace Proxy
                 if (instance.DisposeAfterDisconnect())
                 {
                     instance.Dispose();
-                    instance = CreateModInstance<T>();
+                    instance = GetMemberOrCreateModInstance<T>();
                 }
             }
         }
 
-        private T CreateModInstance<T>() where T : class
+        private T GetMemberOrCreateModInstance<T>() where T : class
         {
-            var classType = (from type in assembly.GetTypes()
+            Type classType;
+
+            foreach (var obj in m_customInjects)
+            {
+                MemberInfo targetMember = null;
+                foreach (var member in obj.GetType().GetMembers())
+                {
+                    var attr = member.GetCustomAttribute<IProxyModMemberAttribute>();
+                    if (attr != null)
+                    {
+                        if (attr.TargetType == typeof(T))
+                        {
+                            return (obj.GetType().GetField(member.Name).GetValue(obj) as T);
+                        }
+                    }
+                }
+
+                if (targetMember != null)
+                {
+                    Console.WriteLine(targetMember.Name);
+                }
+            }
+
+
+            classType = (from type in assembly.GetTypes()
                             where typeof(T).IsAssignableFrom(type)
                             select type).FirstOrDefault();
 
             if (classType != null)
                 return Activator.CreateInstance(classType) as T;
             return null;
+        }
+
+        private void CreateCustomInjections()
+        {
+            var classTypes = (from type in assembly.GetTypes()
+                              where type.GetCustomAttribute<IProxyInjectAttribute>() != null && !type.IsAbstract
+                              select type);
+
+            foreach (var classType in classTypes)
+                m_customInjects.Add(Activator.CreateInstance(classType));
         }
 
         public void Disable()

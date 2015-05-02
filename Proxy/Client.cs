@@ -40,10 +40,12 @@ namespace Proxy
         private static readonly ILog log = LogManager.GetLogger(typeof(Client));
 
         private NetworkCore core;
+        private bool reconnected;
 
         public Client(Socket skt)
         {
             core = new NetworkCore(skt, this);
+            onConnect();
             core.BeginProcess();
 
             core.OnClientPacketReceive += core_OnClientPacketReceive;
@@ -51,21 +53,35 @@ namespace Proxy
             log.Info("Received client.");
         }
 
+        private void onConnect()
+        {
+            if (!reconnected)
+            {
+                reconnected = true;
+            }
+            else
+            {
+                Singleton<Server>.Instance.CurrentHost = Singleton<Server>.Instance.DefaultHost;
+                Singleton<Server>.Instance.CurrentPort = Singleton<Server>.Instance.DefaultPort;
+            }
+        }
+
         private bool core_OnServerPacketReceive(ref Packet packet)
         {
             switch (packet.ID)
             {
                 case PacketID.RECONNECT:
-                    Singleton<Server>.Instance.CurrentHost = String.IsNullOrWhiteSpace((packet as ReconnectPacket).Host) ? Singleton<Server>.Instance.DefaultHost : (packet as ReconnectPacket).Host;
-                    Singleton<Server>.Instance.CurrentPort = (packet as ReconnectPacket).Port == -1 ? Singleton<Server>.Instance.DefaultPort : (packet as ReconnectPacket).Port;
+                    Singleton<Server>.Instance.CurrentHost = String.IsNullOrWhiteSpace((packet as ReconnectPacket).Host) ? Singleton<Server>.Instance.CurrentHost : (packet as ReconnectPacket).Host;
+                    Singleton<Server>.Instance.CurrentPort = (packet as ReconnectPacket).Port == -1 ? Singleton<Server>.Instance.CurrentPort : (packet as ReconnectPacket).Port;
 
                     (packet as ReconnectPacket).Host = "localhost";
                     (packet as ReconnectPacket).Port = 2050;
-                    return true;
+                    reconnected = false;
+                    break;
 
                 case PacketID.CREATE_SUCCESS:
                     var pkt = packet;
-                    Singleton<Network>.Instance.After(1200, new Action(() => SendToClient(new NotificationPacket
+                    Singleton<Network>.Instance.After(1500, new Action(() => SendToClient(new NotificationPacket
                     {
                         Color = new ARGB(0x00ff00),
                         ObjectId = Utils.ChangePacketType<CreateSuccessPacket>(pkt).ObjectID,
